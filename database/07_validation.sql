@@ -5,6 +5,7 @@ UNION ALL SELECT 'TIPO_INSTITUCION', COUNT(*) FROM TIPO_INSTITUCION
 UNION ALL SELECT 'INSTITUCION', COUNT(*) FROM INSTITUCION
 UNION ALL SELECT 'ACREDITACION_INSTITUCION', COUNT(*) FROM ACREDITACION_INSTITUCION
 UNION ALL SELECT 'AREA_CONOCIMIENTO', COUNT(*) FROM AREA_CONOCIMIENTO
+UNION ALL SELECT 'DENOMINACION_CARRERA', COUNT(*) FROM DENOMINACION_CARRERA
 UNION ALL SELECT 'NIVEL_ESTUDIO', COUNT(*) FROM NIVEL_ESTUDIO
 UNION ALL SELECT 'NIVEL_CARRERA', COUNT(*) FROM NIVEL_CARRERA
 UNION ALL SELECT 'MODALIDAD', COUNT(*) FROM MODALIDAD
@@ -28,6 +29,21 @@ HAVING COUNT(*) > 1;
 SELECT COUNT(*) AS costos_negativos
 FROM PLAN_OFERTA
 WHERE valor_matricula < 0 OR valor_arancel < 0;
+
+SELECT COUNT(*) AS denominaciones_sin_area
+FROM DENOMINACION_CARRERA dc
+LEFT JOIN AREA_CONOCIMIENTO a ON a.id_area = dc.id_area
+WHERE a.id_area IS NULL;
+
+SELECT COUNT(*) AS carreras_sin_denominacion
+FROM CARRERA c
+LEFT JOIN DENOMINACION_CARRERA dc ON dc.id_denominacion = c.id_denominacion
+WHERE dc.id_denominacion IS NULL;
+
+SELECT COUNT(*) AS carreras_sin_nivel
+FROM CARRERA c
+LEFT JOIN NIVEL_CARRERA nc ON nc.id_nivel_carrera = c.id_nivel_carrera
+WHERE nc.id_nivel_carrera IS NULL;
 
 SELECT COUNT(*) AS oferta_sin_institucion
 FROM OFERTA_ACADEMICA o
@@ -69,15 +85,15 @@ FROM OFERTA_ACADEMICA
 GROUP BY id_institucion, id_carrera, id_comuna, id_modalidad, id_jornada
 HAVING COUNT(*) > 1;
 
-SELECT nombre, id_nivel_carrera, COUNT(*) AS cantidad
+SELECT id_denominacion, id_nivel_carrera, COUNT(*) AS cantidad
 FROM CARRERA
-GROUP BY nombre, id_nivel_carrera
+GROUP BY id_denominacion, id_nivel_carrera
 HAVING COUNT(*) > 1;
 
-SELECT COUNT(*) AS carreras_sin_area
-FROM CARRERA c
-LEFT JOIN AREA_CONOCIMIENTO a ON a.id_area = c.id_area
-WHERE a.id_area IS NULL;
+SELECT nombre, COUNT(*) AS cantidad
+FROM DENOMINACION_CARRERA
+GROUP BY nombre
+HAVING COUNT(*) > 1;
 
 SELECT COUNT(*) AS niveles_sin_nivel_estudio
 FROM NIVEL_CARRERA nc
