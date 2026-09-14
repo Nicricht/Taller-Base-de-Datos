@@ -4,7 +4,7 @@
 
 Un RECORD es una estructura PL/SQL que permite agrupar varios campos relacionados dentro de una sola variable.
 
-En `plsql/01_record.sql` se usa para reunir en una sola estructura los datos principales de una oferta: carrera, institucion, comuna, modalidad, jornada, matricula y arancel.
+En `plsql/01_record.sql` se usa para reunir en una sola estructura los datos principales de una oferta: denominacion de carrera, nivel, institucion, comuna, modalidad, jornada, matricula y arancel.
 
 Frase de defensa:
 
@@ -24,7 +24,7 @@ Frase de defensa:
 
 Un cursor permite recorrer varias filas devueltas por una consulta. Un cursor parametrizado recibe un valor que modifica la consulta que ejecuta.
 
-En `plsql/03_cursor_loops.sql`, el cursor recibe `id_area` y devuelve las ofertas correspondientes a esa area.
+En `plsql/03_cursor_loops.sql`, el cursor recibe `id_area`. Para encontrar las ofertas del area sigue la relacion `AREA_CONOCIMIENTO -> DENOMINACION_CARRERA -> CARRERA -> OFERTA_ACADEMICA`.
 
 Frase de defensa:
 
@@ -47,7 +47,7 @@ Frase de defensa:
 
 Oracle incorpora excepciones listas para usar. `NO_DATA_FOUND` ocurre cuando un `SELECT ... INTO` no encuentra ninguna fila.
 
-En `plsql/04_excepciones.sql` se busca deliberadamente una carrera inexistente y se captura `NO_DATA_FOUND` para entregar una salida controlada.
+En `plsql/04_excepciones.sql` se busca deliberadamente una carrera inexistente. La consulta une CARRERA con DENOMINACION_CARRERA y NIVEL_CARRERA para obtener un nombre comprensible si el registro existe.
 
 Frase de defensa:
 
