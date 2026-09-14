@@ -52,6 +52,12 @@ Table AREA_CONOCIMIENTO {
   nombre varchar(150) [not null, unique]
 }
 
+Table DENOMINACION_CARRERA {
+  id_denominacion int [pk, increment]
+  id_area int [not null, ref: > AREA_CONOCIMIENTO.id_area]
+  nombre varchar(250) [not null, unique]
+}
+
 Table NIVEL_ESTUDIO {
   id_nivel_estudio int [pk, increment]
   nombre varchar(100) [not null, unique]
@@ -75,12 +81,11 @@ Table JORNADA {
 
 Table CARRERA {
   id_carrera int [pk, increment]
-  id_area int [not null, ref: > AREA_CONOCIMIENTO.id_area]
+  id_denominacion int [not null, ref: > DENOMINACION_CARRERA.id_denominacion]
   id_nivel_carrera int [not null, ref: > NIVEL_CARRERA.id_nivel_carrera]
-  nombre varchar(250) [not null]
 
   indexes {
-    (nombre, id_nivel_carrera) [unique]
+    (id_denominacion, id_nivel_carrera) [unique]
   }
 }
 
@@ -137,35 +142,4 @@ Table MATRICULA_HISTORICA {
   edad int [not null]
   anio_ingreso int [not null]
   semestre_ingreso varchar(30) [not null]
-}
-
-Table STAGING_MATRICULA {
-  id_fuente varchar(30)
-  genero varchar(30)
-  edad varchar(10)
-  rango_edad varchar(30)
-  anio_ingreso varchar(10)
-  semestre_ingreso varchar(40)
-  tipo_institucion varchar(150)
-  nombre_institucion varchar(250)
-  acreditacion_institucional varchar(50)
-  periodo_acreditacion varchar(100)
-  anios_acreditacion varchar(10)
-  nombre_carrera varchar(300)
-  requisito_ingreso varchar(200)
-  via_ingreso varchar(300)
-  modalidad varchar(100)
-  jornada varchar(100)
-  tipo_plan_carrera varchar(150)
-  nivel_estudio_carrera varchar(150)
-  nivel_carrera varchar(150)
-  area_conocimiento varchar(200)
-  duracion_plan varchar(10)
-  duracion_titulacion varchar(10)
-  duracion_total varchar(10)
-  valor_matricula varchar(30)
-  valor_arancel varchar(30)
-  region_sede varchar(150)
-  provincia_sede varchar(150)
-  comuna_sede varchar(150)
 }
