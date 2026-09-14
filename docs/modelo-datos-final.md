@@ -8,7 +8,7 @@ La fuente analizada contiene 106.555 registros y 28 columnas. Las decisiones del
 
 ## Grano de la fuente
 
-Cada fila representa un registro historico de matricula asociado a una oferta/plan academico. El archivo no contiene un identificador persistente de persona, por lo que no se crea una entidad ESTUDIANTE artificial.
+Cada fila representa un registro historico de matricula asociado a una oferta y a un plan academico. El archivo no contiene un identificador persistente de persona, por lo que no se crea una entidad ESTUDIANTE artificial.
 
 ## Modelo definitivo
 
@@ -36,34 +36,39 @@ Relaciones:
 - TIPO_INSTITUCION 1:N INSTITUCION
 - INSTITUCION 1:N ACREDITACION_INSTITUCION
 
-La fuente actual contiene un snapshot de acreditacion por institucion. Se mantiene una tabla separada porque EduBio 360 puede incorporar nuevas cargas anuales sin sobrescribir el historial. La carga inicial usara anio_referencia = 2021.
+La fuente actual contiene un snapshot de acreditacion por institucion. Se mantiene una tabla separada porque EduBio 360 puede incorporar nuevas cargas anuales sin sobrescribir el historial. La carga inicial usa anio_referencia = 2021.
 
 ### Clasificacion academica
 
 7. AREA_CONOCIMIENTO
-8. NIVEL_ESTUDIO
-9. NIVEL_CARRERA
+8. DENOMINACION_CARRERA
+9. NIVEL_ESTUDIO
+10. NIVEL_CARRERA
 
 Relaciones:
+- AREA_CONOCIMIENTO 1:N DENOMINACION_CARRERA
 - NIVEL_ESTUDIO 1:N NIVEL_CARRERA
 
-Dependencia comprobada:
+Dependencias comprobadas:
+- NOMBRE_CARRERA -> AREA_CONOCIMIENTO
 - NIVEL_CARRERA -> NIVEL_ESTUDIO
+
+La separacion DENOMINACION_CARRERA resuelve una dependencia parcial que existia en el modelo anterior. El nombre de la carrera determina el area, pero no determina siempre el nivel de carrera.
 
 ### Catalogos de oferta
 
-10. MODALIDAD
-11. JORNADA
+11. MODALIDAD
+12. JORNADA
 
 La fuente contiene 3 modalidades y 5 jornadas. Se modelan como catalogos controlados para impedir texto inconsistente en las ofertas.
 
 ### Carrera y oferta
 
-12. CARRERA
-13. OFERTA_ACADEMICA
+13. CARRERA
+14. OFERTA_ACADEMICA
 
 Relaciones:
-- AREA_CONOCIMIENTO 1:N CARRERA
+- DENOMINACION_CARRERA 1:N CARRERA
 - NIVEL_CARRERA 1:N CARRERA
 - CARRERA 1:N OFERTA_ACADEMICA
 - INSTITUCION 1:N OFERTA_ACADEMICA
@@ -75,14 +80,20 @@ Hallazgo clave:
 - NOMBRE CARRERA -> AREA CONOCIMIENTO se cumple.
 - NOMBRE CARRERA -> NIVEL CARRERA NO se cumple en 6 nombres.
 
-Por lo tanto, CARRERA no usa solamente el nombre como identidad logica. Se aplica UNIQUE(nombre, id_nivel_carrera).
+Por eso el nombre se almacena una sola vez en DENOMINACION_CARRERA y CARRERA representa la combinacion de una denominacion con un nivel concreto.
 
-La identidad de OFERTA_ACADEMICA se controla con UNIQUE(id_institucion, id_carrera, id_comuna, id_modalidad, id_jornada).
+Clave candidata de CARRERA:
+
+`(id_denominacion, id_nivel_carrera)`
+
+La identidad de OFERTA_ACADEMICA se controla con:
+
+`UNIQUE(id_institucion, id_carrera, id_comuna, id_modalidad, id_jornada)`
 
 ### Plan y costos
 
-14. TIPO_PLAN
-15. PLAN_OFERTA
+15. TIPO_PLAN
+16. PLAN_OFERTA
 
 Relaciones:
 - TIPO_PLAN 1:N PLAN_OFERTA
@@ -92,14 +103,14 @@ Se comprobaron 1.544 ofertas conceptuales y 1.634 combinaciones oferta + plan. E
 
 ### Ingreso
 
-16. REQUISITO_INGRESO
-17. VIA_INGRESO
+17. REQUISITO_INGRESO
+18. VIA_INGRESO
 
 La fuente contiene 5 requisitos de ingreso y 11 vias de ingreso. Ambos pueden variar entre matriculas de una misma oferta, por lo que se relacionan con MATRICULA_HISTORICA y no con OFERTA_ACADEMICA.
 
 ### Hecho historico
 
-18. MATRICULA_HISTORICA
+19. MATRICULA_HISTORICA
 
 Relaciones:
 - PLAN_OFERTA 1:N MATRICULA_HISTORICA
@@ -115,11 +126,15 @@ Atributos principales:
 
 No se persiste RANGO_EDAD porque EDAD -> RANGO_EDAD se cumple y el rango puede derivarse cuando sea necesario.
 
-### Tabla tecnica
+## Tabla tecnica fuera del DER normalizado
 
-19. STAGING_MATRICULA
+### STAGING_MATRICULA
 
-No es una entidad normalizada de negocio. Recibe la carga cruda del archivo y permite validar y transformar antes de insertar en las tablas finales.
+STAGING_MATRICULA no forma parte de las 19 tablas de negocio en 3FN. Es una tabla tecnica intencionalmente desnormalizada que recibe las 28 columnas de la fuente como texto para validar y transformar antes de cargar el modelo relacional.
+
+Flujo:
+
+`Excel -> STAGING_MATRICULA -> validacion -> ETL -> modelo Oracle normalizado`
 
 ## Tablas que deliberadamente no se crean
 
@@ -142,8 +157,8 @@ Es un dato derivable desde EDAD y no se almacena para evitar redundancia.
 - Tipos de institucion: 5
 - Instituciones: 30
 - Areas de conocimiento: 10
-- Nombres de carrera: 824
-- Combinaciones nombre carrera + nivel: 830
+- Denominaciones de carrera: 824
+- Combinaciones denominacion + nivel: 830
 - Niveles de estudio: 3
 - Niveles de carrera: 5
 - Modalidades: 3
@@ -157,12 +172,33 @@ Es un dato derivable desde EDAD y no se almacena para evitar redundancia.
 - Ofertas conceptuales: 1.544
 - Combinaciones oferta + plan: 1.634
 
+## Cardinalidades finales
+
+- REGION 1:N PROVINCIA
+- PROVINCIA 1:N COMUNA
+- TIPO_INSTITUCION 1:N INSTITUCION
+- INSTITUCION 1:N ACREDITACION_INSTITUCION
+- AREA_CONOCIMIENTO 1:N DENOMINACION_CARRERA
+- NIVEL_ESTUDIO 1:N NIVEL_CARRERA
+- DENOMINACION_CARRERA 1:N CARRERA
+- NIVEL_CARRERA 1:N CARRERA
+- CARRERA 1:N OFERTA_ACADEMICA
+- INSTITUCION 1:N OFERTA_ACADEMICA
+- COMUNA 1:N OFERTA_ACADEMICA
+- MODALIDAD 1:N OFERTA_ACADEMICA
+- JORNADA 1:N OFERTA_ACADEMICA
+- OFERTA_ACADEMICA 1:N PLAN_OFERTA
+- TIPO_PLAN 1:N PLAN_OFERTA
+- PLAN_OFERTA 1:N MATRICULA_HISTORICA
+- REQUISITO_INGRESO 1:N MATRICULA_HISTORICA
+- VIA_INGRESO 1:N MATRICULA_HISTORICA
+
 ## Integracion con EduBio 360
 
 La base no sera consumida directamente por el frontend. El flujo previsto es:
 
-Excel fuente -> STAGING_MATRICULA -> ETL -> Oracle normalizado -> Academic/Import/Analytics Service -> API -> EduBio 360
+`Oracle normalizado -> Academic/Import/Analytics Service -> API -> EduBio 360`
 
 ## Regla de cierre
 
-A partir de este documento el modelo se considera cerrado para la EP1, salvo que el profesor indique una correccion concreta. Los siguientes cambios deben concentrarse en DDL, carga, validaciones, PL/SQL, evidencias e informe, no en agregar tablas sin una necesidad demostrable.
+A partir de este documento el modelo se considera cerrado para la EP1, salvo que el profesor indique una correccion concreta o la ejecucion real en Oracle revele una inconsistencia demostrable. Los siguientes cambios deben concentrarse en ejecucion, carga, validaciones, PL/SQL, evidencias e informe, no en agregar tablas sin una necesidad sustentada.
