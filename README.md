@@ -18,7 +18,7 @@ Este repositorio se concentra exclusivamente en la capa de datos:
 
 ## Relacion con EduBio 360
 
-La base almacena y organiza datos academicos como instituciones, carreras, areas, territorio, ofertas, planes, costos y matriculas historicas.
+La base almacena y organiza datos academicos como instituciones, denominaciones de carrera, niveles, ofertas, planes, costos y matriculas historicas.
 
 El flujo previsto es:
 
@@ -32,20 +32,21 @@ El frontend no debe acceder directamente a Oracle.
 - Columnas: **28**
 - IDs fuente distintos: **106.555**
 - Instituciones: **30**
-- Nombres de carrera: **824**
-- Combinaciones carrera + nivel: **830**
+- Denominaciones de carrera: **824**
+- Combinaciones denominacion + nivel: **830**
 - Ofertas conceptuales: **1.544**
 - Combinaciones oferta + plan: **1.634**
 
 ## Modelo final
 
-El modelo contiene **18 tablas de negocio** y una tabla tecnica `STAGING_MATRICULA`.
+El modelo contiene **19 tablas de negocio en 3FN**. La tabla tecnica `STAGING_MATRICULA` se mantiene fuera del DER normalizado porque conserva intencionalmente la estructura plana de la fuente para el proceso ETL.
 
 El detalle y la justificacion se encuentran en:
 
 - `docs/modelo-datos-final.md`
 - `docs/normalizacion-3fn.md`
 - `docs/diagrama-er.dbml`
+- `docs/diagrama-etl.md`
 - `docs/evidencias/01_dependencias_funcionales.md`
 
 ## Scripts Oracle
@@ -92,7 +93,9 @@ La solucion debe demostrar una base relacional Oracle normalizada y trazable, co
 - modelo definitivo basado en datos reales;
 - dependencias funcionales documentadas;
 - 1FN, 2FN y 3FN justificadas;
+- separacion `DENOMINACION_CARRERA` / `CARRERA` para eliminar la dependencia parcial detectada;
 - DER DBML actualizado;
+- staging separado del DER normalizado;
 - DDL Oracle;
 - constraints;
 - indices;
