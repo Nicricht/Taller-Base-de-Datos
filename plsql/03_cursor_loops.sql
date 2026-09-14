@@ -3,15 +3,18 @@ SET SERVEROUTPUT ON;
 DECLARE
     CURSOR c_ofertas_por_area (p_id_area AREA_CONOCIMIENTO.id_area%TYPE) IS
         SELECT
-            c.nombre AS carrera,
+            dc.nombre AS carrera,
+            nc.nombre AS nivel_carrera,
             i.nombre AS institucion,
             po.valor_arancel
-        FROM CARRERA c
+        FROM DENOMINACION_CARRERA dc
+        JOIN CARRERA c ON c.id_denominacion = dc.id_denominacion
+        JOIN NIVEL_CARRERA nc ON nc.id_nivel_carrera = c.id_nivel_carrera
         JOIN OFERTA_ACADEMICA o ON o.id_carrera = c.id_carrera
         JOIN INSTITUCION i ON i.id_institucion = o.id_institucion
         JOIN PLAN_OFERTA po ON po.id_oferta = o.id_oferta
-        WHERE c.id_area = p_id_area
-        ORDER BY c.nombre, i.nombre;
+        WHERE dc.id_area = p_id_area
+        ORDER BY dc.nombre, nc.nombre, i.nombre;
 
     v_contador NUMBER;
 BEGIN
@@ -30,6 +33,7 @@ BEGIN
 
             DBMS_OUTPUT.PUT_LINE(
                 v_contador || '. ' || o.carrera ||
+                ' (' || o.nivel_carrera || ')' ||
                 ' | ' || o.institucion ||
                 ' | Arancel: $' || o.valor_arancel
             );
