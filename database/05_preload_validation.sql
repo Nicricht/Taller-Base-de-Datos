@@ -63,3 +63,13 @@ SELECT nombre_carrera
 FROM STAGING_MATRICULA
 GROUP BY nombre_carrera
 HAVING COUNT(DISTINCT area_conocimiento) > 1;
+
+-- Esta consulta es diagnostica: se espera que devuelva los nombres de carrera
+-- que aparecen asociados a mas de un nivel. Es la evidencia que justifica
+-- separar DENOMINACION_CARRERA de CARRERA.
+SELECT nombre_carrera,
+       COUNT(DISTINCT nivel_carrera) AS niveles_distintos
+FROM STAGING_MATRICULA
+GROUP BY nombre_carrera
+HAVING COUNT(DISTINCT nivel_carrera) > 1
+ORDER BY nombre_carrera;
