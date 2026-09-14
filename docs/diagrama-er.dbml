@@ -7,12 +7,20 @@ Table PROVINCIA {
   id_provincia int [pk, increment]
   nombre varchar(100) [not null]
   id_region int [not null, ref: > REGION.id_region]
+
+  indexes {
+    (nombre, id_region) [unique]
+  }
 }
 
 Table COMUNA {
   id_comuna int [pk, increment]
   nombre varchar(100) [not null]
   id_provincia int [not null, ref: > PROVINCIA.id_provincia]
+
+  indexes {
+    (nombre, id_provincia) [unique]
+  }
 }
 
 Table TIPO_INSTITUCION {
@@ -32,6 +40,10 @@ Table ACREDITACION_INSTITUCION {
   estado varchar(50)
   periodo varchar(100)
   anios_acreditacion int
+
+  indexes {
+    (id_institucion, periodo) [unique]
+  }
 }
 
 Table AREA_CONOCIMIENTO {
@@ -53,6 +65,12 @@ Table NIVEL_CARRERA {
 Table CARRERA {
   id_carrera int [pk, increment]
   nombre varchar(250) [not null]
+  id_area int [not null, ref: > AREA_CONOCIMIENTO.id_area]
+  id_nivel_carrera int [not null, ref: > NIVEL_CARRERA.id_nivel_carrera]
+
+  indexes {
+    (nombre, id_nivel_carrera) [unique]
+  }
 }
 
 Table OFERTA_ACADEMICA {
@@ -60,10 +78,12 @@ Table OFERTA_ACADEMICA {
   id_institucion int [not null, ref: > INSTITUCION.id_institucion]
   id_carrera int [not null, ref: > CARRERA.id_carrera]
   id_comuna int [not null, ref: > COMUNA.id_comuna]
-  id_area int [ref: > AREA_CONOCIMIENTO.id_area]
-  id_nivel_carrera int [ref: > NIVEL_CARRERA.id_nivel_carrera]
-  modalidad varchar(50)
-  jornada varchar(50)
+  modalidad varchar(50) [not null]
+  jornada varchar(50) [not null]
+
+  indexes {
+    (id_institucion, id_carrera, id_comuna, modalidad, jornada) [unique]
+  }
 }
 
 Table PLAN_OFERTA {
@@ -85,4 +105,6 @@ Table MATRICULA_HISTORICA {
   edad int
   anio_ingreso int
   semestre_ingreso varchar(30)
+  requisito_ingreso varchar(100)
+  via_ingreso varchar(200)
 }
