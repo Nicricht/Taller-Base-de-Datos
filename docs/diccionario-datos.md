@@ -42,16 +42,24 @@
 - `id_area`: PK tecnica.
 - `nombre`: nombre unico del area.
 
+## DENOMINACION_CARRERA
+
+- `id_denominacion`: PK tecnica.
+- `id_area`: FK a AREA_CONOCIMIENTO.
+- `nombre`: denominacion academica unica de la carrera, por ejemplo TRABAJO SOCIAL o INGENIERIA EN INFORMATICA.
+- Dependencia funcional representada: `nombre -> id_area`.
+
 ## NIVEL_ESTUDIO
 
 - `id_nivel_estudio`: PK tecnica.
-- `nombre`: Pregrado, Postgrado o Postitulo.
+- `nombre`: nivel de estudio general.
 
 ## NIVEL_CARRERA
 
 - `id_nivel_carrera`: PK tecnica.
 - `id_nivel_estudio`: FK a NIVEL_ESTUDIO.
 - `nombre`: nivel especifico de carrera.
+- Dependencia funcional representada: `nombre -> id_nivel_estudio`.
 
 ## MODALIDAD
 
@@ -66,10 +74,10 @@
 ## CARRERA
 
 - `id_carrera`: PK tecnica.
-- `id_area`: FK a AREA_CONOCIMIENTO.
+- `id_denominacion`: FK a DENOMINACION_CARRERA.
 - `id_nivel_carrera`: FK a NIVEL_CARRERA.
-- `nombre`: nombre de la carrera.
-- Clave candidata: `(nombre, id_nivel_carrera)`.
+- Clave candidata: `(id_denominacion, id_nivel_carrera)`.
+- Representa una denominacion academica en un nivel concreto. El nombre y el area no se repiten en esta tabla.
 
 ## OFERTA_ACADEMICA
 
@@ -121,4 +129,4 @@
 
 ## STAGING_MATRICULA
 
-Tabla tecnica de recepcion de la fuente plana. Sus columnas se mantienen como texto para permitir validar el contenido antes de aplicar conversiones y restricciones del modelo final.
+Tabla tecnica de recepcion de la fuente plana. No forma parte del DER normalizado ni de las 19 tablas de negocio. Sus 28 columnas se mantienen como texto para validar el contenido antes de aplicar conversiones y restricciones del modelo final.
