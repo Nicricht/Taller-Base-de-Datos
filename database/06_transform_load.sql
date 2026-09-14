@@ -61,9 +61,9 @@ SELECT DISTINCT
     i.id_institucion,
     2021,
     TRIM(s.acreditacion_institucional),
-    NULLIF(TRIM(s.periodo_acreditacion), ''),
+    TRIM(s.periodo_acreditacion),
     CASE
-        WHEN NULLIF(TRIM(s.anios_acreditacion), '') IS NULL THEN NULL
+        WHEN TRIM(s.anios_acreditacion) IS NULL THEN NULL
         ELSE TO_NUMBER(TRIM(s.anios_acreditacion))
     END
 FROM STAGING_MATRICULA s
@@ -82,6 +82,16 @@ WHERE TRIM(s.area_conocimiento) IS NOT NULL
   AND NOT EXISTS (
       SELECT 1 FROM AREA_CONOCIMIENTO a
       WHERE a.nombre = TRIM(s.area_conocimiento)
+  );
+
+INSERT INTO DENOMINACION_CARRERA (id_area, nombre)
+SELECT DISTINCT a.id_area, TRIM(s.nombre_carrera)
+FROM STAGING_MATRICULA s
+JOIN AREA_CONOCIMIENTO a ON a.nombre = TRIM(s.area_conocimiento)
+WHERE TRIM(s.nombre_carrera) IS NOT NULL
+  AND NOT EXISTS (
+      SELECT 1 FROM DENOMINACION_CARRERA dc
+      WHERE dc.nombre = TRIM(s.nombre_carrera)
   );
 
 INSERT INTO NIVEL_ESTUDIO (nombre)
@@ -148,21 +158,19 @@ WHERE TRIM(s.via_ingreso) IS NOT NULL
       WHERE v.nombre = TRIM(s.via_ingreso)
   );
 
-INSERT INTO CARRERA (id_area, id_nivel_carrera, nombre)
+INSERT INTO CARRERA (id_denominacion, id_nivel_carrera)
 SELECT DISTINCT
-    a.id_area,
-    nc.id_nivel_carrera,
-    TRIM(s.nombre_carrera)
+    dc.id_denominacion,
+    nc.id_nivel_carrera
 FROM STAGING_MATRICULA s
-JOIN AREA_CONOCIMIENTO a ON a.nombre = TRIM(s.area_conocimiento)
+JOIN DENOMINACION_CARRERA dc ON dc.nombre = TRIM(s.nombre_carrera)
 JOIN NIVEL_CARRERA nc ON nc.nombre = TRIM(s.nivel_carrera)
-WHERE TRIM(s.nombre_carrera) IS NOT NULL
-  AND NOT EXISTS (
-      SELECT 1
-      FROM CARRERA c
-      WHERE c.nombre = TRIM(s.nombre_carrera)
-        AND c.id_nivel_carrera = nc.id_nivel_carrera
-  );
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM CARRERA c
+    WHERE c.id_denominacion = dc.id_denominacion
+      AND c.id_nivel_carrera = nc.id_nivel_carrera
+);
 
 INSERT INTO OFERTA_ACADEMICA (
     id_institucion,
@@ -179,8 +187,9 @@ SELECT DISTINCT
     j.id_jornada
 FROM STAGING_MATRICULA s
 JOIN INSTITUCION i ON i.nombre = TRIM(s.nombre_institucion)
+JOIN DENOMINACION_CARRERA dc ON dc.nombre = TRIM(s.nombre_carrera)
 JOIN NIVEL_CARRERA nc ON nc.nombre = TRIM(s.nivel_carrera)
-JOIN CARRERA c ON c.nombre = TRIM(s.nombre_carrera)
+JOIN CARRERA c ON c.id_denominacion = dc.id_denominacion
               AND c.id_nivel_carrera = nc.id_nivel_carrera
 JOIN REGION r ON r.nombre = TRIM(s.region_sede)
 JOIN PROVINCIA p ON p.id_region = r.id_region
@@ -218,8 +227,9 @@ SELECT DISTINCT
     TO_NUMBER(TRIM(s.valor_arancel))
 FROM STAGING_MATRICULA s
 JOIN INSTITUCION i ON i.nombre = TRIM(s.nombre_institucion)
+JOIN DENOMINACION_CARRERA dc ON dc.nombre = TRIM(s.nombre_carrera)
 JOIN NIVEL_CARRERA nc ON nc.nombre = TRIM(s.nivel_carrera)
-JOIN CARRERA c ON c.nombre = TRIM(s.nombre_carrera)
+JOIN CARRERA c ON c.id_denominacion = dc.id_denominacion
               AND c.id_nivel_carrera = nc.id_nivel_carrera
 JOIN REGION r ON r.nombre = TRIM(s.region_sede)
 JOIN PROVINCIA p ON p.id_region = r.id_region
@@ -267,8 +277,9 @@ SELECT
     TRIM(s.semestre_ingreso)
 FROM STAGING_MATRICULA s
 JOIN INSTITUCION i ON i.nombre = TRIM(s.nombre_institucion)
+JOIN DENOMINACION_CARRERA dc ON dc.nombre = TRIM(s.nombre_carrera)
 JOIN NIVEL_CARRERA nc ON nc.nombre = TRIM(s.nivel_carrera)
-JOIN CARRERA c ON c.nombre = TRIM(s.nombre_carrera)
+JOIN CARRERA c ON c.id_denominacion = dc.id_denominacion
               AND c.id_nivel_carrera = nc.id_nivel_carrera
 JOIN REGION r ON r.nombre = TRIM(s.region_sede)
 JOIN PROVINCIA p ON p.id_region = r.id_region
