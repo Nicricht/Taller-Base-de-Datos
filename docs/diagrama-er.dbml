@@ -1,0 +1,88 @@
+Table REGION {
+  id_region int [pk, increment]
+  nombre varchar(100) [not null, unique]
+}
+
+Table PROVINCIA {
+  id_provincia int [pk, increment]
+  nombre varchar(100) [not null]
+  id_region int [not null, ref: > REGION.id_region]
+}
+
+Table COMUNA {
+  id_comuna int [pk, increment]
+  nombre varchar(100) [not null]
+  id_provincia int [not null, ref: > PROVINCIA.id_provincia]
+}
+
+Table TIPO_INSTITUCION {
+  id_tipo_institucion int [pk, increment]
+  nombre varchar(100) [not null, unique]
+}
+
+Table INSTITUCION {
+  id_institucion int [pk, increment]
+  nombre varchar(200) [not null, unique]
+  id_tipo_institucion int [not null, ref: > TIPO_INSTITUCION.id_tipo_institucion]
+}
+
+Table ACREDITACION_INSTITUCION {
+  id_acreditacion int [pk, increment]
+  id_institucion int [not null, ref: > INSTITUCION.id_institucion]
+  estado varchar(50)
+  periodo varchar(100)
+  anios_acreditacion int
+}
+
+Table AREA_CONOCIMIENTO {
+  id_area int [pk, increment]
+  nombre varchar(150) [not null, unique]
+}
+
+Table NIVEL_ESTUDIO {
+  id_nivel_estudio int [pk, increment]
+  nombre varchar(100) [not null, unique]
+}
+
+Table NIVEL_CARRERA {
+  id_nivel_carrera int [pk, increment]
+  nombre varchar(100) [not null, unique]
+  id_nivel_estudio int [not null, ref: > NIVEL_ESTUDIO.id_nivel_estudio]
+}
+
+Table CARRERA {
+  id_carrera int [pk, increment]
+  nombre varchar(250) [not null]
+}
+
+Table OFERTA_ACADEMICA {
+  id_oferta int [pk, increment]
+  id_institucion int [not null, ref: > INSTITUCION.id_institucion]
+  id_carrera int [not null, ref: > CARRERA.id_carrera]
+  id_comuna int [not null, ref: > COMUNA.id_comuna]
+  id_area int [ref: > AREA_CONOCIMIENTO.id_area]
+  id_nivel_carrera int [ref: > NIVEL_CARRERA.id_nivel_carrera]
+  modalidad varchar(50)
+  jornada varchar(50)
+}
+
+Table PLAN_OFERTA {
+  id_plan_oferta int [pk, increment]
+  id_oferta int [not null, ref: > OFERTA_ACADEMICA.id_oferta]
+  tipo_plan varchar(100)
+  duracion_plan int
+  duracion_titulacion int
+  duracion_total int
+  valor_matricula int
+  valor_arancel int
+}
+
+Table MATRICULA_HISTORICA {
+  id_matricula int [pk, increment]
+  id_registro_fuente int [not null, unique]
+  id_plan_oferta int [not null, ref: > PLAN_OFERTA.id_plan_oferta]
+  genero varchar(20)
+  edad int
+  anio_ingreso int
+  semestre_ingreso varchar(30)
+}
