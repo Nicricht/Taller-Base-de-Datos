@@ -4,84 +4,60 @@
 
 Cargar la fuente plana en una tabla tecnica antes de poblar el modelo normalizado.
 
-El flujo es:
+Flujo:
 
-`Excel -> CSV UTF-8 -> STAGING_MATRICULA -> validaciones -> transformacion -> tablas finales`
+`Excel -> CSV UTF-8 -> STAGING_MATRICULA -> validaciones -> ETL -> tablas finales`
 
-## 1. Exportar el Excel a CSV
+`STAGING_MATRICULA` conserva las 28 columnas de la fuente y no forma parte del DER normalizado.
 
-Abrir la hoja `BASE DE DATOS` y guardarla como CSV UTF-8 con encabezados.
+## Pasos
 
-Nombre esperado por el archivo de control:
+1. Exportar la hoja `BASE DE DATOS` a CSV UTF-8 con encabezados.
+2. Ejecutar `database/04_create_staging.sql`.
+3. Cargar el CSV usando el archivo `database/sqlldr/staging_matricula.ctl`.
+4. Ejecutar `database/05_preload_validation.sql`.
+5. Corregir cualquier conflicto antes de continuar.
+6. Ejecutar `database/06_transform_load.sql`.
+7. Ejecutar `database/07_validation.sql`.
 
-`matriculas_biobio_2021.csv`
+## Validaciones previas
 
-La tabla staging conserva 28 columnas equivalentes a las 28 columnas de la fuente.
-
-## 2. Crear la tabla staging
-
-Ejecutar:
-
-`database/04_create_staging.sql`
-
-## 3. Cargar mediante SQL*Loader
-
-Archivo de control:
-
-`database/sqlldr/staging_matricula.ctl`
-
-Ejemplo de comando:
-
-```bash
-sqlldr usuario/clave@servicio control=database/sqlldr/staging_matricula.ctl log=staging_matricula.log bad=staging_matricula.bad skip=1
-```
-
-`skip=1` evita cargar la fila de encabezados del CSV.
-
-## 4. Validar staging
-
-Ejecutar:
-
-`database/05_preload_validation.sql`
-
-Antes del ETL deben revisarse como minimo:
+Antes del ETL se revisan:
 
 - cantidad total de filas;
 - IDs fuente duplicados;
 - campos criticos nulos;
-- IDs, edades, anos y costos no numericos;
+- campos numericos invalidos;
 - costos negativos;
-- dependencias COMUNA -> PROVINCIA;
-- PROVINCIA -> REGION;
-- INSTITUCION -> TIPO_INSTITUCION;
-- NIVEL_CARRERA -> NIVEL_ESTUDIO;
-- NOMBRE_CARRERA -> AREA_CONOCIMIENTO.
+- COMUNA determina PROVINCIA;
+- PROVINCIA determina REGION;
+- INSTITUCION determina TIPO_INSTITUCION;
+- NIVEL_CARRERA determina NIVEL_ESTUDIO;
+- NOMBRE_CARRERA determina AREA_CONOCIMIENTO;
+- nombres de carrera asociados a mas de un nivel.
 
-Para la fuente actual se espera aproximadamente:
+Para la fuente actual se esperan 106.555 filas y 0 conflictos en las dependencias que deben cumplirse. La ultima consulta diagnostica debe mostrar los nombres que aparecen en mas de un nivel y que justifican separar `DENOMINACION_CARRERA` de `CARRERA`.
 
-- 106.555 filas;
-- 106.555 IDs fuente distintos;
-- 0 costos negativos;
-- 0 conflictos en las dependencias funcionales anteriores.
+## Orden conceptual del ETL
 
-## 5. Transformar al modelo normalizado
+1. REGION, PROVINCIA y COMUNA.
+2. TIPO_INSTITUCION, INSTITUCION y ACREDITACION_INSTITUCION.
+3. AREA_CONOCIMIENTO.
+4. DENOMINACION_CARRERA.
+5. NIVEL_ESTUDIO y NIVEL_CARRERA.
+6. MODALIDAD, JORNADA, TIPO_PLAN, REQUISITO_INGRESO y VIA_INGRESO.
+7. CARRERA.
+8. OFERTA_ACADEMICA.
+9. PLAN_OFERTA.
+10. MATRICULA_HISTORICA.
 
-Cuando staging sea valido, ejecutar:
+## Evidencia final esperada
 
-`database/06_transform_load.sql`
-
-El script carga primero catalogos y entidades padre y luego OFERTA_ACADEMICA, PLAN_OFERTA y MATRICULA_HISTORICA.
-
-## 6. Validacion final
-
-Ejecutar:
-
-`database/07_validation.sql`
-
-La evidencia minima para la evaluacion debe mostrar:
-
-- mas de 1.000 matriculas cargadas;
-- 0 foreign keys huerfanas;
+- mas de 1.000 registros en MATRICULA_HISTORICA;
+- idealmente 106.555 al cargar la fuente completa;
+- 0 claves foraneas huerfanas;
 - 0 costos negativos;
 - 0 IDs fuente duplicados;
+- 0 denominaciones duplicadas;
+- 0 carreras duplicadas segun `(id_denominacion, id_nivel_carrera)`;
 - 0 ofertas duplicadas segun su clave candidata.
