@@ -102,6 +102,39 @@ Ejecutar:
 2. `database/07_validation.sql`
 3. `database/08_sample_queries.sql`
 
+## Instalación rápida opcional
+
+El flujo manual anterior se mantiene completo para aprendizaje, trazabilidad y defensa. Como alternativa, el repositorio incluye ahora un instalador rápido para Windows que automatiza la construcción, carga, ETL y verificación sin reemplazar los scripts originales.
+
+Archivo principal:
+
+- `INSTALAR_EDUBIO360.bat`
+
+Preparación:
+
+1. Tener una instancia Oracle accesible y un usuario/esquema con permisos para crear los objetos del proyecto.
+2. Tener `sqlplus` y `sqlldr` disponibles en el `PATH` de Windows.
+3. Copiar `matriculas_biobio_2021.csv` dentro de la carpeta `data/`.
+4. Ejecutar `INSTALAR_EDUBIO360.bat`.
+5. Confirmar una sola vez la reconstrucción de las tablas del proyecto e ingresar usuario, conexión y contraseña Oracle.
+
+El instalador ejecuta automáticamente:
+
+1. prueba de conexión;
+2. `database/00_run_structure.sql`;
+3. carga del CSV con `database/sqlldr/staging_matricula.ctl`;
+4. `database/00_run_data_pipeline.sql`;
+5. validaciones pre-ETL;
+6. ETL;
+7. validaciones posteriores;
+8. `database/10_assert_final.sql` para confirmar los conteos esperados.
+
+Para el dataset oficial, la verificación final exige **106.555** filas en `STAGING_MATRICULA` y **106.555** filas en `MATRICULA_HISTORICA`, además de los conteos esperados de las tablas normalizadas.
+
+Si `sqlldr` no está disponible, se conserva el método manual de `docs/carga-staging.md`. Después de cargar el CSV manualmente, puede ejecutarse `database/00_run_data_pipeline.sql` con F5 para automatizar toda la parte restante.
+
+El CSV, los logs de SQL*Loader y las credenciales locales siguen fuera de Git mediante `.gitignore`.
+
 ## PL/SQL obligatorio
 
 - `plsql/01_record.sql`
@@ -142,6 +175,9 @@ La solución debe demostrar una base relacional Oracle normalizada y trazable, c
 - control bloqueante previo al ETL;
 - transformación y carga al modelo normalizado;
 - validaciones posteriores;
+- instalación rápida opcional para Windows;
+- pipeline automático de staging a modelo final;
+- verificación final bloqueante de conteos esperados;
 - ejemplos PL/SQL obligatorios;
 - guía de defensa;
 - `.gitignore` para impedir subir por accidente datasets, CSV, logs o credenciales locales.
