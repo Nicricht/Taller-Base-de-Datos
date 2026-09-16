@@ -1,0 +1,23 @@
+# Archivos de datos locales
+*.csv
+*.xlsx
+*.xls
+
+# Salidas de SQL*Loader
+*.log
+*.bad
+*.dsc
+
+# Credenciales y configuraciones locales
+.env
+*.env
+*.properties.local
+
+# Archivos temporales del sistema/editor
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+
+# Evidencias locales no seleccionadas
+capturas-locales/
