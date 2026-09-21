@@ -19,6 +19,7 @@ BEGIN
         JOIN NIVEL_CARRERA nc ON nc.id_nivel_carrera = c.id_nivel_carrera
         JOIN INSTITUCION i ON i.id_institucion = o.id_institucion
         JOIN PLAN_OFERTA po ON po.id_oferta = o.id_oferta
+        WHERE po.valor_arancel > 0
         ORDER BY po.valor_arancel ASC
     )
     WHERE ROWNUM <= 5;
