@@ -397,3 +397,161 @@ El VARRAY se utiliza cuando necesitamos mantener un grupo limitado de valores y 
 En este proyecto ayudan a que el procesamiento quede más ordenado. En vez de declarar una gran cantidad de variables independientes para una oferta, el RECORD agrupa sus datos. En el caso del VARRAY, los resultados quedan almacenados como una colección con un límite definido y luego pueden recorrerse con un LOOP.
 
 La evidencia de ejecución de ambos bloques se incorporará cuando los scripts sean ejecutados y verificados en Oracle. En el repositorio ya se encuentra el código que será utilizado para esa ejecución.
+
+
+# 5. Cursores explícitos y loops
+
+Para esta parte se utiliza el archivo `plsql/03_cursor_loops.sql`. En el script se trabajan dos casos: un cursor explícito sin parámetros y un cursor explícito con parámetro. También se utilizan loops anidados para recorrer áreas de conocimiento y, dentro de cada área, sus ofertas académicas.
+
+## 5.1 Qué es un cursor explícito
+
+Un cursor explícito permite recorrer el resultado de una consulta que puede devolver varias filas. A diferencia de un `SELECT INTO`, que normalmente se utiliza cuando esperamos obtener una sola fila, el cursor permite procesar los registros uno por uno.
+
+En EDUBIO360 esto es útil porque muchas consultas no entregan un solo resultado. Por ejemplo, un área de conocimiento puede tener varias carreras y cada carrera puede tener distintas ofertas académicas.
+
+## 5.2 Cursor sin parámetros
+
+Primero se agregó un cursor simple llamado `c_areas`:
+
+```sql
+CURSOR c_areas IS
+    SELECT id_area, nombre
+    FROM AREA_CONOCIMIENTO
+    ORDER BY nombre;
+```
+
+Este cursor no recibe ningún parámetro. Siempre ejecuta la misma consulta y obtiene las áreas de conocimiento existentes en la tabla `AREA_CONOCIMIENTO`.
+
+Después se recorre con:
+
+```sql
+FOR a IN c_areas LOOP
+    DBMS_OUTPUT.PUT_LINE(
+        a.id_area || ' - ' || a.nombre
+    );
+END LOOP;
+```
+
+Este ejemplo sirve para demostrar el funcionamiento básico de un cursor explícito sin parámetros. El cursor mantiene una consulta definida y el LOOP permite recorrer todos los registros que devuelve.
+
+## 5.3 Cursor explícito con parámetro
+
+El segundo cursor es más completo porque recibe un parámetro:
+
+```sql
+CURSOR c_ofertas_por_area (
+    p_id_area AREA_CONOCIMIENTO.id_area%TYPE
+) IS
+    SELECT
+        dc.nombre AS carrera,
+        nc.nombre AS nivel_carrera,
+        i.nombre AS institucion,
+        po.valor_arancel
+    FROM DENOMINACION_CARRERA dc
+    JOIN CARRERA c
+        ON c.id_denominacion = dc.id_denominacion
+    JOIN NIVEL_CARRERA nc
+        ON nc.id_nivel_carrera = c.id_nivel_carrera
+    JOIN OFERTA_ACADEMICA o
+        ON o.id_carrera = c.id_carrera
+    JOIN INSTITUCION i
+        ON i.id_institucion = o.id_institucion
+    JOIN PLAN_OFERTA po
+        ON po.id_oferta = o.id_oferta
+    WHERE dc.id_area = p_id_area
+    ORDER BY dc.nombre, nc.nombre, i.nombre;
+```
+
+El parámetro `p_id_area` permite ejecutar el mismo cursor para distintas áreas. En vez de crear una consulta distinta para cada área, el identificador se entrega cuando se llama al cursor.
+
+También se utiliza `%TYPE`:
+
+```sql
+p_id_area AREA_CONOCIMIENTO.id_area%TYPE
+```
+
+De esta forma el parámetro utiliza el mismo tipo de dato que la columna `id_area` de la tabla.
+
+La diferencia principal entre los dos cursores utilizados es que `c_areas` siempre ejecuta la misma consulta, mientras que `c_ofertas_por_area` cambia los resultados según el identificador de área que recibe.
+
+## 5.4 Loops anidados
+
+El bloque utiliza más de un LOOP de forma simultánea.
+
+Primero se recorren las áreas:
+
+```sql
+FOR a IN (
+    SELECT id_area, nombre
+    FROM AREA_CONOCIMIENTO
+    ORDER BY nombre
+) LOOP
+```
+
+Dentro de ese recorrido se utiliza el cursor parametrizado:
+
+```sql
+FOR o IN c_ofertas_por_area(a.id_area) LOOP
+```
+
+El valor `a.id_area` del LOOP exterior se envía como parámetro al cursor del LOOP interior.
+
+El funcionamiento puede representarse así:
+
+```text
+Área 1
+  ├─ Oferta 1
+  ├─ Oferta 2
+  ├─ Oferta 3
+  └─ ...
+
+Área 2
+  ├─ Oferta 1
+  ├─ Oferta 2
+  └─ ...
+
+Área 3
+  └─ ...
+```
+
+Dentro de cada área se muestran hasta cinco ofertas. Para controlar esa cantidad se utiliza `v_contador` y:
+
+```sql
+EXIT WHEN v_contador = 5;
+```
+
+Si un área no tiene resultados, el bloque muestra:
+
+```sql
+IF v_contador = 0 THEN
+    DBMS_OUTPUT.PUT_LINE('Sin ofertas para esta area.');
+END IF;
+```
+
+## 5.5 Aplicación al proyecto
+
+Este bloque resuelve una necesidad concreta de EDUBIO360: organizar ofertas académicas según su área de conocimiento.
+
+La consulta no obtiene los datos desde una sola tabla. Para formar cada resultado necesita relacionar `DENOMINACION_CARRERA`, `CARRERA`, `NIVEL_CARRERA`, `OFERTA_ACADEMICA`, `INSTITUCION` y `PLAN_OFERTA`.
+
+De esta forma se puede mostrar información como:
+
+```text
+Área
+  Carrera
+  Nivel
+  Institución
+  Arancel
+```
+
+El cursor con parámetro permite reutilizar la misma lógica para cualquier área existente y los loops anidados permiten mantener una salida ordenada por grupo.
+
+## 5.6 Ventajas y consideración de uso
+
+En este caso los cursores son útiles porque necesitamos recorrer varias filas y ejecutar una lógica por cada resultado. También permiten controlar cuántas ofertas se muestran por área y mantener separado el recorrido de las áreas del recorrido de sus ofertas.
+
+El cursor parametrizado evita repetir una consulta distinta para cada área y permite reutilizar el mismo bloque cambiando solamente el parámetro.
+
+Para operaciones masivas simples, una consulta SQL directa puede ser más eficiente que procesar cada fila con un cursor. En este proyecto el cursor se utiliza porque necesitamos un procesamiento controlado y anidado de los resultados, que es precisamente el caso trabajado en la evaluación.
+
+La evidencia de ejecución de este bloque se agregará después de ejecutarlo y verificarlo en Oracle.
