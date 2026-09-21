@@ -2,14 +2,14 @@ SET SERVEROUTPUT ON;
 
 DECLARE
     TYPE t_oferta IS RECORD (
-        carrera         DENOMINACION_CARRERA.nombre%TYPE,
-        nivel_carrera   NIVEL_CARRERA.nombre%TYPE,
-        institucion     INSTITUCION.nombre%TYPE,
-        comuna          COMUNA.nombre%TYPE,
-        modalidad       MODALIDAD.nombre%TYPE,
-        jornada         JORNADA.nombre%TYPE,
-        valor_matricula PLAN_OFERTA.valor_matricula%TYPE,
-        valor_arancel   PLAN_OFERTA.valor_arancel%TYPE
+        nombre_carrera      DENOMINACION_CARRERA.nombre%TYPE,
+        nombre_nivel        NIVEL_CARRERA.nombre%TYPE,
+        nombre_institucion  INSTITUCION.nombre%TYPE,
+        nombre_comuna       COMUNA.nombre%TYPE,
+        nombre_modalidad    MODALIDAD.nombre%TYPE,
+        nombre_jornada      JORNADA.nombre%TYPE,
+        valor_matricula     PLAN_OFERTA.valor_matricula%TYPE,
+        valor_arancel       PLAN_OFERTA.valor_arancel%TYPE
     );
 
     v_oferta t_oferta;
@@ -25,12 +25,12 @@ BEGIN
         po.valor_matricula,
         po.valor_arancel
     INTO
-        v_oferta.carrera,
-        v_oferta.nivel_carrera,
-        v_oferta.institucion,
-        v_oferta.comuna,
-        v_oferta.modalidad,
-        v_oferta.jornada,
+        v_oferta.nombre_carrera,
+        v_oferta.nombre_nivel,
+        v_oferta.nombre_institucion,
+        v_oferta.nombre_comuna,
+        v_oferta.nombre_modalidad,
+        v_oferta.nombre_jornada,
         v_oferta.valor_matricula,
         v_oferta.valor_arancel
     FROM OFERTA_ACADEMICA o
@@ -45,12 +45,12 @@ BEGIN
     WHERE o.id_oferta = v_id_oferta
       AND ROWNUM = 1;
 
-    DBMS_OUTPUT.PUT_LINE('Carrera: ' || v_oferta.carrera);
-    DBMS_OUTPUT.PUT_LINE('Nivel: ' || v_oferta.nivel_carrera);
-    DBMS_OUTPUT.PUT_LINE('Institucion: ' || v_oferta.institucion);
-    DBMS_OUTPUT.PUT_LINE('Comuna: ' || v_oferta.comuna);
-    DBMS_OUTPUT.PUT_LINE('Modalidad: ' || v_oferta.modalidad);
-    DBMS_OUTPUT.PUT_LINE('Jornada: ' || v_oferta.jornada);
+    DBMS_OUTPUT.PUT_LINE('Carrera: ' || v_oferta.nombre_carrera);
+    DBMS_OUTPUT.PUT_LINE('Nivel: ' || v_oferta.nombre_nivel);
+    DBMS_OUTPUT.PUT_LINE('Institucion: ' || v_oferta.nombre_institucion);
+    DBMS_OUTPUT.PUT_LINE('Comuna: ' || v_oferta.nombre_comuna);
+    DBMS_OUTPUT.PUT_LINE('Modalidad: ' || v_oferta.nombre_modalidad);
+    DBMS_OUTPUT.PUT_LINE('Jornada: ' || v_oferta.nombre_jornada);
     DBMS_OUTPUT.PUT_LINE('Matricula: $' || v_oferta.valor_matricula);
     DBMS_OUTPUT.PUT_LINE('Arancel: $' || v_oferta.valor_arancel);
 END;
