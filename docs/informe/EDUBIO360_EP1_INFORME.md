@@ -555,3 +555,127 @@ El cursor parametrizado evita repetir una consulta distinta para cada área y pe
 Para operaciones masivas simples, una consulta SQL directa puede ser más eficiente que procesar cada fila con un cursor. En este proyecto el cursor se utiliza porque necesitamos un procesamiento controlado y anidado de los resultados, que es precisamente el caso trabajado en la evaluación.
 
 La evidencia de ejecución de este bloque se agregará después de ejecutarlo y verificarlo en Oracle.
+
+
+# 6. Control de excepciones
+
+Para esta parte se utiliza el archivo `plsql/04_excepciones.sql`. En el script se trabajan dos casos: una excepción predefinida por Oracle y una excepción creada por nosotros para una regla del proyecto.
+
+## 6.1 Excepción predefinida por Oracle
+
+Oracle tiene excepciones que ya vienen definidas y que se producen cuando ocurre una situación conocida durante la ejecución de un bloque PL/SQL.
+
+En el primer ejemplo se utiliza:
+
+```sql
+NO_DATA_FOUND
+```
+
+El bloque busca una carrera utilizando un identificador que no existe:
+
+```sql
+v_id_carrera NUMBER := -999;
+```
+
+Después se ejecuta la consulta:
+
+```sql
+SELECT dc.nombre, nc.nombre
+INTO v_nombre, v_nivel
+FROM CARRERA c
+JOIN DENOMINACION_CARRERA dc
+    ON dc.id_denominacion = c.id_denominacion
+JOIN NIVEL_CARRERA nc
+    ON nc.id_nivel_carrera = c.id_nivel_carrera
+WHERE c.id_carrera = v_id_carrera;
+```
+
+Como la consulta no encuentra ninguna fila, Oracle genera la excepción `NO_DATA_FOUND`.
+
+La excepción se controla de esta forma:
+
+```sql
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE(
+            'NO_DATA_FOUND: no existe una carrera con el ID ' || v_id_carrera
+        );
+```
+
+Con esto el bloque no termina mostrando solamente un error técnico de Oracle, sino que entrega un mensaje entendible indicando que la carrera buscada no existe.
+
+En EDUBIO360 este tipo de excepción puede ser útil cuando se intenta consultar una carrera, institución u oferta mediante un identificador que no se encuentra en la base de datos.
+
+## 6.2 Excepción definida por el usuario
+
+El segundo ejemplo utiliza una excepción creada dentro del mismo bloque:
+
+```sql
+e_arancel_invalido EXCEPTION;
+```
+
+Para probarla se utiliza un arancel negativo:
+
+```sql
+v_arancel NUMBER := -1;
+```
+
+Luego se revisa la condición:
+
+```sql
+IF v_arancel < 0 THEN
+    RAISE e_arancel_invalido;
+END IF;
+```
+
+Si se cumple la condición, la excepción se lanza utilizando `RAISE`.
+
+Después se controla con:
+
+```sql
+EXCEPTION
+    WHEN e_arancel_invalido THEN
+        DBMS_OUTPUT.PUT_LINE(
+            'EXCEPCION DE USUARIO: el arancel no puede ser negativo.'
+        );
+```
+
+En este caso Oracle no tiene que decidir por sí solo que un arancel negativo representa un problema para EDUBIO360. Esa condición corresponde a una regla que nosotros queremos controlar dentro del procesamiento.
+
+## 6.3 Diferencia entre ambos tipos de excepción
+
+La diferencia principal es que una excepción predefinida ya forma parte de Oracle, mientras que una excepción definida por el usuario se crea para representar una condición específica que queremos controlar.
+
+En nuestro caso:
+
+```text
+NO_DATA_FOUND
+→ Oracle detecta que una consulta no devolvió filas.
+
+e_arancel_invalido
+→ Nosotros definimos que un arancel negativo no debe continuar como un valor válido.
+```
+
+Por lo tanto, las excepciones predefinidas se utilizan cuando Oracle ya reconoce el tipo de error. Las excepciones personalizadas se utilizan cuando necesitamos controlar una situación propia de la lógica del proyecto.
+
+## 6.4 Integración en EDUBIO360
+
+El manejo de excepciones permite que los bloques PL/SQL respondan de manera controlada cuando ocurre una situación inesperada.
+
+Por ejemplo, si se intenta consultar una oferta que ya no existe, se puede controlar `NO_DATA_FOUND` y entregar un mensaje claro.
+
+También se pueden definir excepciones propias para validar reglas antes de continuar con una operación. El ejemplo del arancel negativo muestra esta idea de forma simple.
+
+Esto ayuda a evitar que un bloque continúe trabajando con información inválida y permite identificar con mayor claridad qué problema ocurrió.
+
+En una implementación posterior también se podrían controlar otras situaciones, como valores inválidos durante una carga o errores relacionados con reglas específicas de actualización de datos.
+
+## 6.5 Aporte a la integridad de los datos
+
+El control de excepciones no reemplaza restricciones como `CHECK`, `NOT NULL`, claves primarias o claves foráneas. Esas restricciones siguen siendo parte importante de la integridad de la base de datos.
+
+Las excepciones sirven como una capa adicional dentro de la lógica PL/SQL. Permiten detectar un problema durante el procesamiento, detener o cambiar el flujo y entregar una respuesta más clara.
+
+En EDUBIO360 se combinan las restricciones del modelo con el manejo de excepciones para evitar trabajar silenciosamente con datos incorrectos.
+
+La evidencia de ejecución de los dos casos se incorporará cuando el script sea ejecutado y revisado en Oracle.
