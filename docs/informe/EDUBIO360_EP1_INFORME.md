@@ -881,3 +881,261 @@ Como siguientes pasos, se recomienda ejecutar todos los scripts en Oracle y guar
 También sería conveniente incorporar los stored objects propuestos cuando el proyecto tenga operaciones reales que los necesiten. Por ejemplo, un procedimiento para generar reportes, una función para clasificar aranceles, un package para organizar lógica académica y un trigger para auditoría cuando existan actualizaciones reales sobre información sensible.
 
 Finalmente, cualquier cambio futuro en el modelo debería mantener la misma idea utilizada en esta evaluación: no agregar tablas, reglas u objetos sin una necesidad concreta y comprobable dentro de EDUBIO360.
+
+
+# 9. Anexos
+
+## 9.1 Código completo utilizado en los bloques PL/SQL
+
+Los siguientes scripts corresponden al código utilizado en las secciones prácticas de esta evaluación. También se encuentran separados dentro de la carpeta `plsql/` del repositorio.
+
+### Anexo A - RECORD
+
+Archivo: `plsql/01_record.sql`
+
+```sql
+SET SERVEROUTPUT ON;
+
+DECLARE
+    TYPE t_oferta IS RECORD (
+        carrera         DENOMINACION_CARRERA.nombre%TYPE,
+        nivel_carrera   NIVEL_CARRERA.nombre%TYPE,
+        institucion     INSTITUCION.nombre%TYPE,
+        comuna          COMUNA.nombre%TYPE,
+        modalidad       MODALIDAD.nombre%TYPE,
+        jornada         JORNADA.nombre%TYPE,
+        valor_matricula PLAN_OFERTA.valor_matricula%TYPE,
+        valor_arancel   PLAN_OFERTA.valor_arancel%TYPE
+    );
+
+    v_oferta t_oferta;
+    v_id_oferta OFERTA_ACADEMICA.id_oferta%TYPE := 1;
+BEGIN
+    SELECT
+        dc.nombre,
+        nc.nombre,
+        i.nombre,
+        co.nombre,
+        m.nombre,
+        j.nombre,
+        po.valor_matricula,
+        po.valor_arancel
+    INTO
+        v_oferta.carrera,
+        v_oferta.nivel_carrera,
+        v_oferta.institucion,
+        v_oferta.comuna,
+        v_oferta.modalidad,
+        v_oferta.jornada,
+        v_oferta.valor_matricula,
+        v_oferta.valor_arancel
+    FROM OFERTA_ACADEMICA o
+    JOIN CARRERA c ON c.id_carrera = o.id_carrera
+    JOIN DENOMINACION_CARRERA dc ON dc.id_denominacion = c.id_denominacion
+    JOIN NIVEL_CARRERA nc ON nc.id_nivel_carrera = c.id_nivel_carrera
+    JOIN INSTITUCION i ON i.id_institucion = o.id_institucion
+    JOIN COMUNA co ON co.id_comuna = o.id_comuna
+    JOIN MODALIDAD m ON m.id_modalidad = o.id_modalidad
+    JOIN JORNADA j ON j.id_jornada = o.id_jornada
+    JOIN PLAN_OFERTA po ON po.id_oferta = o.id_oferta
+    WHERE o.id_oferta = v_id_oferta
+      AND ROWNUM = 1;
+
+    DBMS_OUTPUT.PUT_LINE('Carrera: ' || v_oferta.carrera);
+    DBMS_OUTPUT.PUT_LINE('Nivel: ' || v_oferta.nivel_carrera);
+    DBMS_OUTPUT.PUT_LINE('Institucion: ' || v_oferta.institucion);
+    DBMS_OUTPUT.PUT_LINE('Comuna: ' || v_oferta.comuna);
+    DBMS_OUTPUT.PUT_LINE('Modalidad: ' || v_oferta.modalidad);
+    DBMS_OUTPUT.PUT_LINE('Jornada: ' || v_oferta.jornada);
+    DBMS_OUTPUT.PUT_LINE('Matricula: $' || v_oferta.valor_matricula);
+    DBMS_OUTPUT.PUT_LINE('Arancel: $' || v_oferta.valor_arancel);
+END;
+/
+```
+
+### Anexo B - VARRAY
+
+Archivo: `plsql/02_varray.sql`
+
+```sql
+SET SERVEROUTPUT ON;
+
+DECLARE
+    TYPE t_nombres IS VARRAY(5) OF VARCHAR2(400);
+    TYPE t_aranceles IS VARRAY(5) OF NUMBER;
+
+    v_nombres t_nombres;
+    v_aranceles t_aranceles;
+BEGIN
+    SELECT nombre_oferta, valor_arancel
+    BULK COLLECT INTO v_nombres, v_aranceles
+    FROM (
+        SELECT
+            dc.nombre || ' (' || nc.nombre || ') - ' || i.nombre AS nombre_oferta,
+            po.valor_arancel
+        FROM OFERTA_ACADEMICA o
+        JOIN CARRERA c ON c.id_carrera = o.id_carrera
+        JOIN DENOMINACION_CARRERA dc ON dc.id_denominacion = c.id_denominacion
+        JOIN NIVEL_CARRERA nc ON nc.id_nivel_carrera = c.id_nivel_carrera
+        JOIN INSTITUCION i ON i.id_institucion = o.id_institucion
+        JOIN PLAN_OFERTA po ON po.id_oferta = o.id_oferta
+        ORDER BY po.valor_arancel ASC
+    )
+    WHERE ROWNUM <= 5;
+
+    FOR i IN 1 .. v_nombres.COUNT LOOP
+        DBMS_OUTPUT.PUT_LINE(
+            i || '. ' || v_nombres(i) || ' | Arancel: $' || v_aranceles(i)
+        );
+    END LOOP;
+END;
+/
+```
+
+### Anexo C - Cursores y loops
+
+Archivo: `plsql/03_cursor_loops.sql`
+
+```sql
+SET SERVEROUTPUT ON;
+
+DECLARE
+    CURSOR c_areas IS
+        SELECT id_area, nombre
+        FROM AREA_CONOCIMIENTO
+        ORDER BY nombre;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('AREAS DE CONOCIMIENTO');
+
+    FOR a IN c_areas LOOP
+        DBMS_OUTPUT.PUT_LINE(
+            a.id_area || ' - ' || a.nombre
+        );
+    END LOOP;
+END;
+/
+
+DECLARE
+    CURSOR c_ofertas_por_area (p_id_area AREA_CONOCIMIENTO.id_area%TYPE) IS
+        SELECT
+            dc.nombre AS carrera,
+            nc.nombre AS nivel_carrera,
+            i.nombre AS institucion,
+            po.valor_arancel
+        FROM DENOMINACION_CARRERA dc
+        JOIN CARRERA c ON c.id_denominacion = dc.id_denominacion
+        JOIN NIVEL_CARRERA nc ON nc.id_nivel_carrera = c.id_nivel_carrera
+        JOIN OFERTA_ACADEMICA o ON o.id_carrera = c.id_carrera
+        JOIN INSTITUCION i ON i.id_institucion = o.id_institucion
+        JOIN PLAN_OFERTA po ON po.id_oferta = o.id_oferta
+        WHERE dc.id_area = p_id_area
+        ORDER BY dc.nombre, nc.nombre, i.nombre;
+
+    v_contador NUMBER;
+BEGIN
+    FOR a IN (
+        SELECT id_area, nombre
+        FROM AREA_CONOCIMIENTO
+        ORDER BY nombre
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('====================================');
+        DBMS_OUTPUT.PUT_LINE('AREA: ' || a.nombre);
+
+        v_contador := 0;
+
+        FOR o IN c_ofertas_por_area(a.id_area) LOOP
+            v_contador := v_contador + 1;
+
+            DBMS_OUTPUT.PUT_LINE(
+                v_contador || '. ' || o.carrera ||
+                ' (' || o.nivel_carrera || ')' ||
+                ' | ' || o.institucion ||
+                ' | Arancel: $' || o.valor_arancel
+            );
+
+            EXIT WHEN v_contador = 5;
+        END LOOP;
+
+        IF v_contador = 0 THEN
+            DBMS_OUTPUT.PUT_LINE('Sin ofertas para esta area.');
+        END IF;
+    END LOOP;
+END;
+/
+```
+
+### Anexo D - Excepciones
+
+Archivo: `plsql/04_excepciones.sql`
+
+```sql
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_nombre DENOMINACION_CARRERA.nombre%TYPE;
+    v_nivel NIVEL_CARRERA.nombre%TYPE;
+    v_id_carrera NUMBER := -999;
+BEGIN
+    SELECT dc.nombre, nc.nombre
+    INTO v_nombre, v_nivel
+    FROM CARRERA c
+    JOIN DENOMINACION_CARRERA dc ON dc.id_denominacion = c.id_denominacion
+    JOIN NIVEL_CARRERA nc ON nc.id_nivel_carrera = c.id_nivel_carrera
+    WHERE c.id_carrera = v_id_carrera;
+
+    DBMS_OUTPUT.PUT_LINE('Carrera encontrada: ' || v_nombre || ' (' || v_nivel || ')');
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE(
+            'NO_DATA_FOUND: no existe una carrera con el ID ' || v_id_carrera
+        );
+END;
+/
+
+DECLARE
+    e_arancel_invalido EXCEPTION;
+    v_arancel NUMBER := -1;
+BEGIN
+    IF v_arancel < 0 THEN
+        RAISE e_arancel_invalido;
+    END IF;
+
+    DBMS_OUTPUT.PUT_LINE('Arancel valido: $' || v_arancel);
+EXCEPTION
+    WHEN e_arancel_invalido THEN
+        DBMS_OUTPUT.PUT_LINE(
+            'EXCEPCION DE USUARIO: el arancel no puede ser negativo.'
+        );
+END;
+/
+```
+
+## 9.2 Diagramas y modelos
+
+El modelo de datos utilizado en el proyecto se encuentra documentado en los siguientes archivos del repositorio:
+
+- `docs/diagrama-er.dbml`: definición del diagrama entidad-relación.
+- `docs/modelo-datos-final.md`: explicación del modelo final, entidades, relaciones y decisiones.
+- `docs/normalizacion-3fn.md`: justificación del proceso de normalización hasta 3FN.
+- `database/01_create_tables.sql`: creación física de las tablas y relaciones en Oracle.
+- `database/10_assert_final.sql`: validación de conteos esperados después de la carga.
+
+La tabla `STAGING_MATRICULA` se mantiene fuera del DER normalizado porque corresponde a una tabla técnica de recepción y transformación de los datos originales.
+
+## 9.3 Evidencias de ejecución
+
+Las evidencias de ejecución deben corresponder a resultados reales obtenidos desde Oracle. Por esta razón, no se agregan capturas o salidas simuladas en este informe.
+
+Cuando se realice la ejecución final se deben guardar evidencias de:
+
+- carga de los 106.555 registros de la fuente;
+- conteos de las tablas principales;
+- ejecución del bloque RECORD;
+- ejecución del bloque VARRAY;
+- ejecución del cursor sin parámetros;
+- ejecución del cursor parametrizado con loops anidados;
+- ejecución de `NO_DATA_FOUND`;
+- ejecución de la excepción `e_arancel_invalido`;
+- validación final mediante `database/10_assert_final.sql`.
+
+Estas evidencias se almacenarán en `docs/evidencias/ejecucion-oracle/` para mantenerlas junto al resto del proyecto.
