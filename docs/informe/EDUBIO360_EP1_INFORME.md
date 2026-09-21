@@ -91,3 +91,156 @@ A partir de los datos almacenados se busca generar información que pueda ser ú
 También se necesita obtener información agrupada para poder recorrer varias ofertas y mostrar resultados mediante PL/SQL. Por ejemplo, se pueden listar ofertas pertenecientes a una determinada área de conocimiento o recuperar un grupo reducido de alternativas con sus respectivos aranceles.
 
 Estas necesidades son las que justifican el uso de los elementos que se trabajan en la evaluación. RECORD permite reunir varios datos relacionados de una oferta, VARRAY permite manejar una cantidad limitada de resultados, los cursores permiten recorrer varias filas y las excepciones permiten controlar situaciones que podrían producir errores durante el procesamiento.
+
+# 3. Modelo de base de datos
+
+## 3.1 Modelo relacional
+
+El modelo final de EDUBIO360 está formado por 19 tablas de negocio relacionadas entre sí. Además existe la tabla técnica `STAGING_MATRICULA`, que se utiliza solamente para recibir los datos originales antes de validarlos y transformarlos.
+
+Las tablas principales se pueden agrupar de la siguiente forma:
+
+- **Territorio:** REGION, PROVINCIA y COMUNA.
+- **Instituciones:** TIPO_INSTITUCION, INSTITUCION y ACREDITACION_INSTITUCION.
+- **Clasificación académica:** AREA_CONOCIMIENTO, DENOMINACION_CARRERA, NIVEL_ESTUDIO y NIVEL_CARRERA.
+- **Oferta académica:** MODALIDAD, JORNADA, CARRERA y OFERTA_ACADEMICA.
+- **Planes y costos:** TIPO_PLAN y PLAN_OFERTA.
+- **Ingreso:** REQUISITO_INGRESO y VIA_INGRESO.
+- **Información histórica:** MATRICULA_HISTORICA.
+
+Cada tabla representa un concepto específico. Por ejemplo, `CARRERA` representa una denominación asociada a un nivel académico, mientras que `OFERTA_ACADEMICA` representa dónde y cómo se ofrece esa carrera. Esta separación evita guardar todos los datos repetidos en una sola tabla.
+
+## 3.2 Relaciones principales
+
+La mayoría de las relaciones del modelo son de uno a muchos. Esto significa que un registro de una tabla puede estar relacionado con varios registros de otra tabla.
+
+Algunos ejemplos del modelo son:
+
+```text
+REGION 1:N PROVINCIA
+PROVINCIA 1:N COMUNA
+
+TIPO_INSTITUCION 1:N INSTITUCION
+INSTITUCION 1:N ACREDITACION_INSTITUCION
+
+AREA_CONOCIMIENTO 1:N DENOMINACION_CARRERA
+NIVEL_ESTUDIO 1:N NIVEL_CARRERA
+
+DENOMINACION_CARRERA 1:N CARRERA
+NIVEL_CARRERA 1:N CARRERA
+
+CARRERA 1:N OFERTA_ACADEMICA
+INSTITUCION 1:N OFERTA_ACADEMICA
+COMUNA 1:N OFERTA_ACADEMICA
+MODALIDAD 1:N OFERTA_ACADEMICA
+JORNADA 1:N OFERTA_ACADEMICA
+
+OFERTA_ACADEMICA 1:N PLAN_OFERTA
+TIPO_PLAN 1:N PLAN_OFERTA
+
+PLAN_OFERTA 1:N MATRICULA_HISTORICA
+REQUISITO_INGRESO 1:N MATRICULA_HISTORICA
+VIA_INGRESO 1:N MATRICULA_HISTORICA
+```
+
+Estas relaciones se controlan mediante claves primarias y claves foráneas. También se utilizan restricciones `UNIQUE` para evitar duplicados donde corresponde.
+
+Un ejemplo importante es `OFERTA_ACADEMICA`. Una oferta queda identificada por la combinación de institución, carrera, comuna, modalidad y jornada. De esta forma se evita registrar dos veces exactamente la misma oferta.
+
+## 3.3 Normalización
+
+La fuente original tiene 106.555 filas y 28 columnas en una estructura plana. En esa estructura se repiten datos como institución, comuna, provincia, región, carrera y nivel. Para ordenar la información se aplicó normalización hasta Tercera Forma Normal.
+
+### Primera Forma Normal (1FN)
+
+La Primera Forma Normal busca que cada columna tenga un valor único y que cada fila pueda identificarse.
+
+En el modelo de EDUBIO360 cada tabla tiene una clave primaria y no se guardan listas dentro de una sola columna. Por ejemplo, las vías de ingreso no se guardan juntas en un texto, sino que cada vía se almacena como un registro de `VIA_INGRESO` y luego se referencia desde `MATRICULA_HISTORICA`.
+
+### Segunda Forma Normal (2FN)
+
+Durante el análisis apareció un problema con la carrera. En un modelo anterior se pensaba guardar en una misma tabla el nombre de la carrera, el nivel y el área de conocimiento.
+
+Sin embargo, al revisar los datos se comprobó que el nombre de la carrera determina el área de conocimiento, pero no siempre determina el nivel de carrera. Se encontraron nombres de carrera que aparecen asociados a más de un nivel.
+
+Por eso se separaron dos conceptos:
+
+```text
+DENOMINACION_CARRERA
+- id_denominacion
+- id_area
+- nombre
+
+CARRERA
+- id_carrera
+- id_denominacion
+- id_nivel_carrera
+```
+
+Con esta separación, `DENOMINACION_CARRERA` guarda el nombre y su área, mientras que `CARRERA` representa la combinación entre esa denominación y un nivel específico. Esto evita que el área dependa solamente de una parte de la clave candidata de carrera.
+
+## 3.4 Tercera Forma Normal (3FN)
+
+Para llegar a 3FN también fue necesario eliminar dependencias transitivas. Un ejemplo claro está en los datos territoriales.
+
+En el archivo original se cumple:
+
+```text
+COMUNA -> PROVINCIA -> REGION
+```
+
+Si provincia y región se guardaran repetidas cada vez que aparece una comuna, existiría información duplicada. Por eso el modelo utiliza:
+
+```text
+REGION
+   ↓
+PROVINCIA
+   ↓
+COMUNA
+```
+
+Otro caso es el nivel académico:
+
+```text
+NIVEL_CARRERA -> NIVEL_ESTUDIO
+```
+
+Por esta razón, `NIVEL_ESTUDIO` se almacena en su propia tabla y `NIVEL_CARRERA` lo referencia mediante una clave foránea.
+
+También se comprobó:
+
+```text
+NOMBRE_CARRERA -> AREA_CONOCIMIENTO
+```
+
+pero no se cumple siempre:
+
+```text
+NOMBRE_CARRERA -> NIVEL_CARRERA
+```
+
+Esta diferencia fue una de las razones principales para separar `DENOMINACION_CARRERA` de `CARRERA`.
+
+Otro dato que no se almacena directamente es el rango de edad. Como el rango puede obtenerse a partir de la edad, se puede calcular cuando sea necesario y así no se guarda información derivada de forma repetida.
+
+Finalmente, `OFERTA_ACADEMICA` y `PLAN_OFERTA` están separadas porque una misma oferta puede presentar diferentes tipos de plan, duraciones o valores. La oferta identifica la carrera, institución, ubicación, modalidad y jornada, mientras que el plan guarda las características y costos que pueden variar.
+
+## 3.5 Tabla de staging
+
+`STAGING_MATRICULA` no se considera parte de las 19 tablas normalizadas. Su función es recibir las 28 columnas del archivo original como una etapa temporal de carga.
+
+El flujo es:
+
+```text
+Archivo original
+      ↓
+STAGING_MATRICULA
+      ↓
+Validaciones
+      ↓
+Transformación
+      ↓
+Tablas normalizadas
+```
+
+Por esta razón, la tabla de staging puede conservar datos repetidos. Su objetivo no es cumplir 3FN, sino servir como punto intermedio para revisar y transformar la información antes de llevarla al modelo final.
