@@ -679,3 +679,180 @@ Las excepciones sirven como una capa adicional dentro de la lógica PL/SQL. Perm
 En EDUBIO360 se combinan las restricciones del modelo con el manejo de excepciones para evitar trabajar silenciosamente con datos incorrectos.
 
 La evidencia de ejecución de los dos casos se incorporará cuando el script sea ejecutado y revisado en Oracle.
+
+
+# 7. Evaluación de procedimientos, funciones, packages y triggers
+
+En esta evaluación no se implementaron estos objetos como parte obligatoria del código actual. La pauta pide evaluar cómo podrían utilizarse dentro del proyecto y proponer una estrategia clara de uso futuro.
+
+En EDUBIO360 se decidió no crear objetos almacenados solo para aumentar la cantidad de elementos de la base. La idea es utilizarlos cuando exista una necesidad real de reutilización, cálculo, organización o auditoría.
+
+## 7.1 Procedimiento almacenado
+
+Un procedimiento almacenado es un bloque PL/SQL que queda guardado en la base de datos y puede ejecutarse cada vez que se necesite realizar una tarea determinada.
+
+Para EDUBIO360 se propone como uso futuro:
+
+```text
+pr_generar_reporte_ofertas(p_id_area)
+```
+
+La idea sería recibir un identificador de área y ejecutar una consulta que reúna las ofertas relacionadas con esa área.
+
+Este procedimiento podría servir cuando el sistema necesite generar el mismo tipo de reporte varias veces sin repetir toda la lógica en distintos lugares.
+
+Por ejemplo:
+
+```text
+Usuario solicita ofertas de un área
+        ↓
+Backend envía id_area
+        ↓
+pr_generar_reporte_ofertas
+        ↓
+Consulta información académica
+        ↓
+Genera el resultado
+```
+
+La principal ventaja sería reutilizar una misma operación y mantenerla centralizada.
+
+Como posible limitación, si el procedimiento concentra demasiadas consultas o lógica, puede volverse difícil de mantener. Por eso se debería mantener una responsabilidad clara y evitar convertir un solo procedimiento en un bloque demasiado grande.
+
+## 7.2 Función almacenada
+
+Una función almacenada también queda guardada en Oracle, pero se diferencia porque devuelve un valor.
+
+Para EDUBIO360 se propone:
+
+```text
+fn_clasificar_arancel(p_valor_arancel)
+```
+
+Su objetivo podría ser recibir un arancel y devolver una clasificación que después pueda utilizarse en comparaciones o reportes.
+
+Por ejemplo:
+
+```text
+Arancel recibido
+     ↓
+fn_clasificar_arancel
+     ↓
+Clasificación
+```
+
+Dependiendo de las reglas que se definan más adelante, la función podría devolver valores como una categoría de costo.
+
+La ventaja sería tener una sola regla de clasificación reutilizable. Si esa regla cambia, se podría modificar en un solo lugar.
+
+Una limitación sería usar la función demasiadas veces sobre una gran cantidad de filas si su lógica fuera pesada, ya que podría afectar el rendimiento. Por eso su uso tendría que evaluarse según la consulta y el volumen de datos.
+
+## 7.3 Package
+
+Un Package permite agrupar elementos PL/SQL relacionados, como procedimientos, funciones, tipos y otras definiciones.
+
+Para EDUBIO360 se propone como idea futura:
+
+```text
+pkg_academico
+```
+
+Dentro de ese paquete podrían quedar agrupadas operaciones relacionadas con la información académica.
+
+Por ejemplo:
+
+```text
+PKG_ACADEMICO
+│
+├── pr_generar_reporte_ofertas
+├── fn_clasificar_arancel
+└── otras operaciones académicas
+```
+
+Esto ayudaría a mantener organizadas las funciones y procedimientos del mismo dominio en vez de tenerlos todos separados.
+
+También podría facilitar el mantenimiento porque las operaciones académicas quedarían agrupadas bajo un mismo módulo.
+
+Como posible dificultad, un Package demasiado grande puede terminar mezclando responsabilidades diferentes. Por eso sería necesario separar los objetos según su función y evitar agrupar todo solo por comodidad.
+
+## 7.4 Trigger
+
+Un Trigger es un objeto que se ejecuta automáticamente cuando ocurre un evento en la base de datos, como `INSERT`, `UPDATE` o `DELETE`.
+
+En EDUBIO360 se propone utilizar un Trigger en una fase futura para auditar cambios sensibles, especialmente modificaciones relacionadas con los valores de arancel.
+
+El funcionamiento podría ser:
+
+```text
+UPDATE de un arancel
+        ↓
+Trigger
+        ↓
+Registrar el cambio
+        ↓
+Tabla de historial o auditoría
+```
+
+En esa tabla se podrían guardar datos como el valor anterior, el nuevo valor, la fecha de modificación y algún identificador del usuario o proceso que realizó el cambio.
+
+Actualmente EDUBIO360 todavía no tiene una operación transaccional real de mantenimiento de aranceles, por lo que no se creó una tabla de auditoría ni un Trigger solamente para esta evaluación.
+
+La ventaja del Trigger es que la auditoría podría ejecutarse automáticamente sin depender de que cada operación recuerde registrar el cambio de forma manual.
+
+Una posible desventaja es que la lógica se ejecuta de forma automática y puede ser menos visible para quien realiza una modificación. También podría afectar el rendimiento si se agregan demasiados Triggers o si realizan operaciones muy pesadas.
+
+## 7.5 Estrategia de interacción futura
+
+Los cuatro objetos pueden trabajar en conjunto, pero cada uno tendría una responsabilidad distinta.
+
+Una posible organización futura sería:
+
+```text
+Backend / API
+      ↓
+PKG_ACADEMICO
+      ↓
+Procedures y Functions
+      ↓
+Tablas Oracle
+
+UPDATE de datos sensibles
+      ↓
+Trigger
+      ↓
+Auditoría
+```
+
+El Package serviría para agrupar la lógica académica.
+
+Los Procedures ejecutarían tareas completas, como generar información o procesar una operación.
+
+Las Functions devolverían valores específicos que puedan reutilizarse, por ejemplo una clasificación.
+
+Los Triggers quedarían para tareas automáticas asociadas directamente a eventos de la base, como una auditoría.
+
+## 7.6 Reutilización y mantenimiento
+
+El principal aporte de Procedures y Functions sería evitar repetir la misma lógica en varios lugares.
+
+Si una consulta o regla se utiliza desde distintos procesos, resulta más fácil mantener una sola versión que tener varias copias.
+
+Los Packages ayudarían a ordenar esos objetos según su propósito.
+
+Esto también puede facilitar los cambios futuros, porque una modificación puede realizarse en un punto central en vez de revisar varias partes del sistema.
+
+## 7.7 Riesgos y limitaciones
+
+Aunque estos objetos pueden ser útiles, no conviene utilizarlos sin una necesidad concreta.
+
+Entre los aspectos que habría que revisar antes de implementarlos se encuentran:
+
+- **Rendimiento:** procedimientos, funciones o triggers con consultas pesadas pueden aumentar el tiempo de ejecución.
+- **Mantenimiento:** demasiada lógica dentro de Oracle puede hacer más difícil entender dónde se está procesando cada regla.
+- **Complejidad:** un Package demasiado grande o varios Triggers sobre las mismas tablas pueden volver más difícil seguir el flujo del sistema.
+- **Seguridad:** los permisos para ejecutar procedimientos o modificar objetos almacenados deben controlarse correctamente.
+- **Dependencias:** si una función o procedimiento depende de una tabla que cambia, puede ser necesario revisar y recompilar el objeto.
+
+Por estas razones, en EDUBIO360 se plantea implementar estos objetos solamente cuando exista una operación real que los justifique.
+
+En esta etapa se deja definida la estrategia de uso futuro, mientras que el código actual de la evaluación se concentra en RECORD, VARRAY, cursores, loops y excepciones.
