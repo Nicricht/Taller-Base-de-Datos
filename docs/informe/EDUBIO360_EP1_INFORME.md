@@ -399,7 +399,7 @@ En este proyecto ayudan a que el procesamiento quede más ordenado. En vez de de
 La evidencia de ejecución de ambos bloques se incorporará cuando los scripts sean ejecutados y verificados en Oracle. En el repositorio ya se encuentra el código que será utilizado para esa ejecución.
 
 
-# 5. Cursores explícitos y loops
+# 5. Cursores y loops
 
 Para esta parte se utiliza el archivo `plsql/03_cursor_loops.sql`. En el script se trabajan dos casos: un cursor explícito sin parámetros y un cursor explícito con parámetro. También se utilizan loops anidados para recorrer áreas de conocimiento y, dentro de cada área, sus ofertas académicas.
 
