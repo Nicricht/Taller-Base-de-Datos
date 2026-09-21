@@ -1,6 +1,22 @@
 SET SERVEROUTPUT ON;
 
 DECLARE
+    CURSOR c_areas IS
+        SELECT id_area, nombre
+        FROM AREA_CONOCIMIENTO
+        ORDER BY nombre;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('AREAS DE CONOCIMIENTO');
+
+    FOR a IN c_areas LOOP
+        DBMS_OUTPUT.PUT_LINE(
+            a.id_area || ' - ' || a.nombre
+        );
+    END LOOP;
+END;
+/
+
+DECLARE
     CURSOR c_ofertas_por_area (p_id_area AREA_CONOCIMIENTO.id_area%TYPE) IS
         SELECT
             dc.nombre AS carrera,
