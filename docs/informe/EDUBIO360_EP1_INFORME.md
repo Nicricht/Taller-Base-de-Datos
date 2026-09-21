@@ -244,3 +244,156 @@ Tablas normalizadas
 ```
 
 Por esta razón, la tabla de staging puede conservar datos repetidos. Su objetivo no es cumplir 3FN, sino servir como punto intermedio para revisar y transformar la información antes de llevarla al modelo final.
+
+
+# 4. Tipos de datos compuestos
+
+Para esta parte de la evaluación se trabajó con los tipos compuestos RECORD y VARRAY dentro de bloques PL/SQL anónimos. La idea no fue usarlos solamente porque aparecen en la pauta, sino relacionarlos con información que realmente existe en EDUBIO360.
+
+Los scripts utilizados para esta sección son:
+
+- `plsql/01_record.sql`
+- `plsql/02_varray.sql`
+
+## 4.1 RECORD
+
+Un RECORD permite reunir varios datos relacionados dentro de una sola variable. En EDUBIO360 se utilizó para representar una oferta académica completa.
+
+El tipo creado en el bloque PL/SQL es:
+
+```sql
+TYPE t_oferta IS RECORD (
+    carrera         DENOMINACION_CARRERA.nombre%TYPE,
+    nivel_carrera   NIVEL_CARRERA.nombre%TYPE,
+    institucion     INSTITUCION.nombre%TYPE,
+    comuna          COMUNA.nombre%TYPE,
+    modalidad       MODALIDAD.nombre%TYPE,
+    jornada         JORNADA.nombre%TYPE,
+    valor_matricula PLAN_OFERTA.valor_matricula%TYPE,
+    valor_arancel   PLAN_OFERTA.valor_arancel%TYPE
+);
+```
+
+Luego se declara una variable de ese tipo:
+
+```sql
+v_oferta t_oferta;
+```
+
+La consulta obtiene los datos desde varias tablas relacionadas y los guarda dentro del mismo RECORD mediante `SELECT INTO`.
+
+En este caso el RECORD contiene:
+
+- nombre de la carrera;
+- nivel de la carrera;
+- institución;
+- comuna;
+- modalidad;
+- jornada;
+- valor de matrícula;
+- valor de arancel.
+
+Para realizar la búsqueda se utiliza un identificador de oferta:
+
+```sql
+v_id_oferta OFERTA_ACADEMICA.id_oferta%TYPE := 1;
+```
+
+Después, el bloque consulta las tablas relacionadas y guarda el resultado dentro de `v_oferta`.
+
+Un fragmento de esa parte es:
+
+```sql
+SELECT
+    dc.nombre,
+    nc.nombre,
+    i.nombre,
+    co.nombre,
+    m.nombre,
+    j.nombre,
+    po.valor_matricula,
+    po.valor_arancel
+INTO
+    v_oferta.carrera,
+    v_oferta.nivel_carrera,
+    v_oferta.institucion,
+    v_oferta.comuna,
+    v_oferta.modalidad,
+    v_oferta.jornada,
+    v_oferta.valor_matricula,
+    v_oferta.valor_arancel
+...
+WHERE o.id_oferta = v_id_oferta
+  AND ROWNUM = 1;
+```
+
+Finalmente, los datos se muestran utilizando `DBMS_OUTPUT.PUT_LINE`.
+
+En EDUBIO360 esto es útil porque una oferta no se entiende solamente por el nombre de la carrera. Para mostrar una alternativa académica también necesitamos saber qué institución la ofrece, dónde se encuentra, la modalidad, jornada y sus valores. El RECORD permite tratar esos datos relacionados como una sola estructura en vez de trabajar con muchas variables separadas.
+
+También se utilizó `%TYPE` para que los campos del RECORD tomen el mismo tipo de dato que las columnas reales de las tablas. De esta forma, el bloque queda relacionado directamente con la estructura de la base.
+
+## 4.2 VARRAY
+
+El segundo tipo compuesto utilizado fue VARRAY. En este caso se necesitaba trabajar con un grupo pequeño y limitado de resultados.
+
+El script declara dos arreglos con capacidad máxima de cinco elementos:
+
+```sql
+TYPE t_nombres IS VARRAY(5) OF VARCHAR2(400);
+TYPE t_aranceles IS VARRAY(5) OF NUMBER;
+```
+
+Luego se crean las variables:
+
+```sql
+v_nombres t_nombres;
+v_aranceles t_aranceles;
+```
+
+La consulta obtiene cinco ofertas junto con sus aranceles. Los resultados se cargan utilizando `BULK COLLECT`:
+
+```sql
+SELECT nombre_oferta, valor_arancel
+BULK COLLECT INTO v_nombres, v_aranceles
+FROM (
+    SELECT
+        dc.nombre || ' (' || nc.nombre || ') - ' || i.nombre AS nombre_oferta,
+        po.valor_arancel
+    FROM OFERTA_ACADEMICA o
+    JOIN CARRERA c ON c.id_carrera = o.id_carrera
+    JOIN DENOMINACION_CARRERA dc ON dc.id_denominacion = c.id_denominacion
+    JOIN NIVEL_CARRERA nc ON nc.id_nivel_carrera = c.id_nivel_carrera
+    JOIN INSTITUCION i ON i.id_institucion = o.id_institucion
+    JOIN PLAN_OFERTA po ON po.id_oferta = o.id_oferta
+    ORDER BY po.valor_arancel ASC
+)
+WHERE ROWNUM <= 5;
+```
+
+Después se recorren los elementos con un LOOP:
+
+```sql
+FOR i IN 1 .. v_nombres.COUNT LOOP
+    DBMS_OUTPUT.PUT_LINE(
+        i || '. ' || v_nombres(i) ||
+        ' | Arancel: $' || v_aranceles(i)
+    );
+END LOOP;
+```
+
+En este ejemplo el VARRAY sirve porque se decidió trabajar con un máximo conocido de cinco resultados. El bloque conserva los nombres de las ofertas y sus aranceles para después recorrerlos y mostrarlos.
+
+Esto se puede relacionar con una necesidad de EDUBIO360, ya que el sistema puede requerir mostrar un conjunto reducido de alternativas para revisar o comparar. En este ejercicio se usan las cinco ofertas con menor arancel según la consulta del script.
+
+## 4.3 Aporte de RECORD y VARRAY al proyecto
+
+Los dos tipos compuestos resuelven necesidades distintas.
+
+El RECORD se utiliza cuando necesitamos representar en una sola estructura diferentes datos que pertenecen a una misma oferta académica.
+
+El VARRAY se utiliza cuando necesitamos mantener un grupo limitado de valores y recorrerlos dentro del bloque PL/SQL.
+
+En este proyecto ayudan a que el procesamiento quede más ordenado. En vez de declarar una gran cantidad de variables independientes para una oferta, el RECORD agrupa sus datos. En el caso del VARRAY, los resultados quedan almacenados como una colección con un límite definido y luego pueden recorrerse con un LOOP.
+
+La evidencia de ejecución de ambos bloques se incorporará cuando los scripts sean ejecutados y verificados en Oracle. En el repositorio ya se encuentra el código que será utilizado para esa ejecución.
