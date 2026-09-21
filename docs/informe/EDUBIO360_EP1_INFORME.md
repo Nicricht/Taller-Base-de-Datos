@@ -856,3 +856,28 @@ Entre los aspectos que habría que revisar antes de implementarlos se encuentran
 Por estas razones, en EDUBIO360 se plantea implementar estos objetos solamente cuando exista una operación real que los justifique.
 
 En esta etapa se deja definida la estrategia de uso futuro, mientras que el código actual de la evaluación se concentra en RECORD, VARRAY, cursores, loops y excepciones.
+
+
+# 8. Conclusión
+
+En esta evaluación se trabajó la parte de base de datos de EDUBIO360 a partir de una fuente real con 106.555 registros y 28 columnas. El principal trabajo fue transformar esa información plana en un modelo relacional Oracle más ordenado, separando los datos en tablas según su función y aplicando normalización hasta Tercera Forma Normal.
+
+También se utilizaron distintos elementos de PL/SQL relacionados directamente con las necesidades del proyecto. RECORD permitió reunir en una sola estructura los datos principales de una oferta académica. VARRAY permitió manejar un grupo limitado de resultados. Los cursores permitieron recorrer varias filas y, mediante loops anidados, organizar las ofertas según su área de conocimiento. Finalmente, el manejo de excepciones permitió controlar situaciones como búsquedas sin resultados y valores inválidos definidos por la lógica del proyecto.
+
+Otro punto importante fue evaluar cómo se podrían incorporar en el futuro procedimientos almacenados, funciones, packages y triggers. Estos objetos no se agregaron solo para cumplir cantidad, sino que se dejaron asociados a necesidades concretas como generación de reportes, clasificación de aranceles, organización de lógica académica y auditoría de cambios.
+
+## 8.1 Impacto del proyecto
+
+El trabajo realizado mejora la forma en que EDUBIO360 puede almacenar y procesar información académica. Al tener los datos separados y relacionados mediante claves primarias y foráneas, se reduce la repetición innecesaria y se facilita realizar consultas sobre carreras, instituciones, comunas, modalidades, jornadas y costos.
+
+El uso de PL/SQL también permite incorporar lógica dentro de la base de datos cuando sea necesario. Esto puede servir para generar información más estructurada, controlar errores durante el procesamiento y reutilizar operaciones en futuras etapas del proyecto.
+
+La base de datos queda preparada para ser utilizada posteriormente por otros componentes de EDUBIO360, como servicios backend o una API, sin que el frontend tenga que conectarse directamente a Oracle.
+
+## 8.2 Recomendaciones y trabajo futuro
+
+Como siguientes pasos, se recomienda ejecutar todos los scripts en Oracle y guardar evidencias reales de su funcionamiento. Esto incluye revisar la carga de datos, validar los conteos esperados y ejecutar los bloques de RECORD, VARRAY, cursores, loops y excepciones.
+
+También sería conveniente incorporar los stored objects propuestos cuando el proyecto tenga operaciones reales que los necesiten. Por ejemplo, un procedimiento para generar reportes, una función para clasificar aranceles, un package para organizar lógica académica y un trigger para auditoría cuando existan actualizaciones reales sobre información sensible.
+
+Finalmente, cualquier cambio futuro en el modelo debería mantener la misma idea utilizada en esta evaluación: no agregar tablas, reglas u objetos sin una necesidad concreta y comprobable dentro de EDUBIO360.
