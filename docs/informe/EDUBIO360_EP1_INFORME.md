@@ -366,6 +366,7 @@ FROM (
     JOIN NIVEL_CARRERA nc ON nc.id_nivel_carrera = c.id_nivel_carrera
     JOIN INSTITUCION i ON i.id_institucion = o.id_institucion
     JOIN PLAN_OFERTA po ON po.id_oferta = o.id_oferta
+    WHERE po.valor_arancel > 0
     ORDER BY po.valor_arancel ASC
 )
 WHERE ROWNUM <= 5;
@@ -384,7 +385,7 @@ END LOOP;
 
 En este ejemplo el VARRAY sirve porque se decidió trabajar con un máximo conocido de cinco resultados. El bloque conserva los nombres de las ofertas y sus aranceles para después recorrerlos y mostrarlos.
 
-Esto se puede relacionar con una necesidad de EDUBIO360, ya que el sistema puede requerir mostrar un conjunto reducido de alternativas para revisar o comparar. En este ejercicio se usan las cinco ofertas con menor arancel según la consulta del script.
+Esto se puede relacionar con una necesidad de EDUBIO360, ya que el sistema puede requerir mostrar un conjunto reducido de alternativas para revisar o comparar. En este ejercicio se usan las cinco ofertas con menor arancel positivo según la consulta del script, excluyendo valores iguales a cero para que la comparación represente costos informados.
 
 ## 4.3 Aporte de RECORD y VARRAY al proyecto
 
