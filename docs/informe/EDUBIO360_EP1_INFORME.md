@@ -155,13 +155,13 @@ Un ejemplo importante es `OFERTA_ACADEMICA`. Una oferta queda identificada por l
 
 La fuente original tiene 106.555 filas y 28 columnas en una estructura plana. En esa estructura se repiten datos como institución, comuna, provincia, región, carrera y nivel. Para ordenar la información se aplicó normalización hasta Tercera Forma Normal.
 
-### Primera Forma Normal (1FN)
+### 3.3.1 Primera Forma Normal (1FN)
 
 La Primera Forma Normal busca que cada campo contenga un valor atómico, es decir, un solo dato por posición, y que cada fila pueda identificarse mediante una clave.
 
 En el modelo de EDUBIO360 cada tabla tiene una clave primaria y no se guardan listas dentro de una sola columna. Por ejemplo, las vías de ingreso no se guardan juntas en un texto, sino que cada vía se almacena como un registro de `VIA_INGRESO` y luego se referencia desde `MATRICULA_HISTORICA`.
 
-### Segunda Forma Normal (2FN)
+### 3.3.2 Segunda Forma Normal (2FN)
 
 Una vez cumplida la 1FN, se revisaron las dependencias entre los datos para evitar que atributos distintos quedaran unidos de forma innecesaria. Durante este análisis apareció un problema con la carrera: en un modelo anterior se pensaba guardar en una misma tabla el nombre de la carrera, el nivel y el área de conocimiento.
 
@@ -183,7 +183,7 @@ CARRERA
 
 Con esta separación, `DENOMINACION_CARRERA` guarda el nombre y su área, mientras que `CARRERA` representa la combinación entre esa denominación y un nivel específico. Esto evita que el área dependa solamente de una parte de la clave candidata de carrera.
 
-## 3.4 Tercera Forma Normal (3FN)
+### 3.3.3 Tercera Forma Normal (3FN)
 
 Para llegar a 3FN también fue necesario eliminar dependencias transitivas. Un ejemplo claro está en los datos territoriales.
 
@@ -229,7 +229,7 @@ Otro dato que no se almacena directamente es el rango de edad. Como el rango pue
 
 Finalmente, `OFERTA_ACADEMICA` y `PLAN_OFERTA` están separadas porque una misma oferta puede presentar diferentes tipos de plan, duraciones o valores. La oferta identifica la carrera, institución, ubicación, modalidad y jornada, mientras que el plan guarda las características y costos que pueden variar.
 
-## 3.5 Tabla de staging
+## 3.4 Tabla temporal de carga
 
 `STAGING_MATRICULA` no se considera parte de las 19 tablas normalizadas. Su función es recibir las 28 columnas del archivo original como una etapa temporal de carga.
 
