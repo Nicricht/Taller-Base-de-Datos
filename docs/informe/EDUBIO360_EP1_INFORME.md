@@ -721,11 +721,9 @@ En EDUBIO360 se combinan las restricciones del modelo con el manejo de excepcion
 Los tres casos (`NO_DATA_FOUND`, `TOO_MANY_ROWS` y `e_arancel_invalido`) fueron ejecutados y verificados en Oracle SQL Developer. La salida real se encuentra documentada en `docs/evidencias/ejecucion-oracle/04_excepciones.txt` y también se guardaron capturas visuales individuales de cada ejecución.
 
 
-# 7. Evaluación de procedimientos, funciones, packages y triggers
+# 7. Procedimientos, funciones, packages y triggers
 
-En esta evaluación la pauta pide analizar cómo podrían utilizarse procedimientos, funciones, packages y triggers. Estos objetos no se implementan solamente para demostrar su existencia. Primero se analiza qué problema podría resolver cada uno dentro de EDUBIO360 y cuándo tendría sentido incorporarlo.
-
-En EDUBIO360 se decidió no crear objetos almacenados solo para aumentar la cantidad de elementos de la base. La idea es utilizarlos cuando exista una necesidad real de reutilización, cálculo, organización o auditoría.
+Los procedimientos, funciones, packages y triggers representan alternativas para incorporar lógica reutilizable, cálculos, organización y automatización dentro de la base de datos. En EDUBIO360 su uso se plantea a partir de necesidades concretas del proyecto, considerando qué responsabilidad tendría cada objeto y en qué momento sería conveniente incorporarlo.
 
 ## 7.1 Procedimiento almacenado
 
@@ -835,7 +833,7 @@ Tabla de historial o auditoría
 
 En esa tabla se podrían guardar datos como el valor anterior, el nuevo valor, la fecha de modificación y algún identificador del usuario o proceso que realizó el cambio.
 
-Actualmente EDUBIO360 todavía no tiene una operación transaccional real de mantenimiento de aranceles, por lo que no se creó una tabla de auditoría ni un Trigger solamente para esta evaluación.
+Actualmente EDUBIO360 no cuenta con una operación transaccional de mantenimiento de aranceles. Por esta razón, la tabla de auditoría y el Trigger se mantienen como parte del diseño futuro hasta que exista un proceso real de actualización que justifique su incorporación.
 
 La ventaja del Trigger es que la auditoría podría ejecutarse automáticamente sin depender de que cada operación recuerde registrar el cambio de forma manual.
 
@@ -886,9 +884,7 @@ Entre los aspectos que habría que revisar antes de implementarlos se encuentran
 - **Dependencias:** Procedures, Functions y Packages pueden depender de tablas, columnas u otros objetos. Si uno de esos elementos cambia, hay que revisar los objetos dependientes y, si corresponde, recompilarlos.
 - **Integridad y auditoría:** los triggers pueden ayudar a registrar cambios o reforzar ciertas reglas, pero no deben reemplazar restricciones como claves primarias, claves foráneas, `CHECK` o `NOT NULL`. En EDUBIO360 se utilizarían como apoyo, por ejemplo para dejar un historial de modificaciones de arancel.
 
-Por estas razones, en EDUBIO360 se plantea implementar estos objetos solamente cuando exista una operación real que los justifique.
-
-En esta etapa se deja definida la estrategia de uso futuro, mientras que el código actual de la evaluación se concentra en RECORD, VARRAY, cursores, loops y excepciones.
+Por estas razones, en EDUBIO360 estos objetos se incorporarían cuando exista una operación real que justifique su uso. La estrategia definida permite mantener una separación clara entre la lógica ya implementada en PL/SQL y los objetos almacenados previstos para futuras necesidades de procesamiento, reutilización y auditoría.
 
 
 # 8. Conclusión
