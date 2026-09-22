@@ -248,7 +248,7 @@ Por esta razón, la tabla de staging puede conservar datos repetidos. Su objetiv
 
 # 4. Tipos de datos compuestos
 
-Para esta parte de la evaluación se trabajó con los tipos compuestos RECORD y VARRAY dentro de bloques PL/SQL anónimos. La idea no fue usarlos solamente porque aparecen en la pauta, sino relacionarlos con información que realmente existe en EDUBIO360.
+EDUBIO360 utiliza los tipos compuestos RECORD y VARRAY dentro de bloques PL/SQL anónimos para organizar y procesar información académica. Ambos se aplican sobre datos reales del proyecto y cumplen funciones distintas dentro del procesamiento.
 
 Los scripts utilizados para esta sección son:
 
@@ -335,7 +335,7 @@ También se utiliza `%TYPE`. Con esto no se escribe manualmente el tipo de dato 
 
 ## 4.2 VARRAY
 
-El segundo tipo compuesto es VARRAY. Un VARRAY funciona como una lista que tiene un límite máximo definido. Para este ejercicio se trabaja con cinco ofertas, ya que se busca guardar un grupo pequeño de alternativas y después recorrerlas.
+El segundo tipo compuesto utilizado es VARRAY. Un VARRAY funciona como una lista con un límite máximo definido. En EDUBIO360 se configuró con capacidad para cinco ofertas, ya que el procesamiento requiere conservar un grupo pequeño y controlado de alternativas antes de recorrerlas.
 
 El script declara dos arreglos con capacidad máxima de cinco elementos:
 
@@ -383,9 +383,9 @@ FOR i IN 1 .. v_nombres.COUNT LOOP
 END LOOP;
 ```
 
-En este ejemplo el VARRAY sirve porque se decidió trabajar con un máximo conocido de cinco resultados. El bloque conserva los nombres de las ofertas y sus aranceles para después recorrerlos y mostrarlos.
+El VARRAY resulta adecuado porque la cantidad de resultados que se desea conservar está previamente limitada a cinco. El bloque mantiene los nombres de las ofertas y sus aranceles en posiciones relacionadas para después recorrerlos y mostrarlos.
 
-Esto se puede relacionar con una necesidad de EDUBIO360, ya que el sistema puede requerir mostrar un conjunto reducido de alternativas para revisar o comparar. En este ejercicio se usan las cinco ofertas con menor arancel positivo según la consulta del script, excluyendo valores iguales a cero para que la comparación represente costos informados.
+Esta estructura responde a una necesidad concreta de EDUBIO360: trabajar con un conjunto reducido de alternativas que puedan revisarse o compararse. La consulta selecciona las cinco ofertas con menor arancel positivo y excluye valores iguales a cero para que la comparación considere costos informados.
 
 ## 4.3 Aporte de RECORD y VARRAY al proyecto
 
@@ -397,7 +397,7 @@ VARRAY se utiliza cuando se necesita guardar una lista de tamaño limitado, en e
 
 En este proyecto también aportan a la eficiencia del procesamiento, pero cada uno de una forma distinta. Con RECORD se pueden manejar todos los datos de una oferta mediante una sola variable estructurada, en vez de crear y controlar muchas variables independientes. Esto hace que el bloque sea más claro y reduce la posibilidad de confundir datos que pertenecen a ofertas diferentes.
 
-Con VARRAY se pueden guardar varios valores relacionados dentro de una colección con un límite conocido. En el ejercicio también se utiliza `BULK COLLECT` para traer varias filas de la consulta en una sola operación y almacenarlas directamente en las colecciones. Después esos resultados se recorren con un LOOP. Para EDUBIO360 esto resulta útil cuando se necesita trabajar con un grupo pequeño y controlado de alternativas, como las cinco ofertas utilizadas en el ejemplo.
+Con VARRAY se pueden guardar varios valores relacionados dentro de una colección con un límite conocido. El bloque utiliza `BULK COLLECT` para traer varias filas de la consulta en una sola operación y almacenarlas directamente en las colecciones. Después, esos resultados se recorren con un LOOP. Para EDUBIO360 esto resulta útil cuando se necesita trabajar con un grupo pequeño y controlado de alternativas, como las cinco ofertas seleccionadas por la consulta.
 
 Los bloques fueron ejecutados y verificados en Oracle SQL Developer. Las evidencias obtenidas se almacenan en `docs/evidencias/ejecucion-oracle/` junto con el resto del proyecto.
 
