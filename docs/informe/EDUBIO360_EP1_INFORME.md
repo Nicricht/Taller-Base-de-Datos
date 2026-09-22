@@ -90,7 +90,7 @@ A partir de los datos almacenados se busca generar información que pueda ser ú
 
 También se necesita obtener información agrupada para poder recorrer varias ofertas y mostrar resultados mediante PL/SQL. Por ejemplo, se pueden listar ofertas pertenecientes a una determinada área de conocimiento o recuperar un grupo reducido de alternativas con sus respectivos aranceles.
 
-Estas necesidades son las que justifican el uso de los elementos que se trabajan en la evaluación. RECORD permite reunir varios datos relacionados de una oferta, VARRAY permite manejar una cantidad limitada de resultados, los cursores permiten recorrer varias filas y las excepciones permiten controlar situaciones que podrían producir errores durante el procesamiento.
+Estas necesidades de procesamiento se resuelven con distintos elementos de PL/SQL. RECORD permite reunir varios datos relacionados de una oferta en una sola estructura, VARRAY permite manejar una cantidad limitada de resultados, los cursores permiten recorrer conjuntos de filas y las excepciones permiten controlar situaciones que podrían producir errores durante el procesamiento.
 
 # 3. Modelo de base de datos
 
