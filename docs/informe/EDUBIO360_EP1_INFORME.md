@@ -479,14 +479,12 @@ La diferencia principal entre los dos cursores utilizados es que `c_areas` siemp
 
 El bloque utiliza más de un LOOP de forma simultánea.
 
-Primero se recorren las áreas:
+En la versión complementaria orientada a la estructura trabajada en clases, ambos cursores se declaran en el mismo bloque. Primero se define `c_areas` como cursor principal y luego `c_ofertas_por_area(p_id_area)` como cursor dependiente.
+
+El recorrido exterior utiliza directamente el cursor principal:
 
 ```sql
-FOR a IN (
-    SELECT id_area, nombre
-    FROM AREA_CONOCIMIENTO
-    ORDER BY nombre
-) LOOP
+FOR a IN c_areas LOOP
 ```
 
 Dentro de ese recorrido se utiliza el cursor parametrizado:
@@ -1065,6 +1063,12 @@ BEGIN
 END;
 /
 ```
+
+### Anexo C.1 - Cursor parametrizado y cursores anidados con estructura de clases
+
+Archivo: `plsql/03b_cursores_estilo_clase.sql`
+
+Este archivo contiene dos demostraciones adicionales. La primera recorre manualmente un cursor con parámetro mediante `OPEN`, `FETCH`, `%NOTFOUND` y `CLOSE`. La segunda declara un cursor principal de áreas y un cursor parametrizado de ofertas dentro del mismo bloque, utilizando loops anidados.
 
 ### Anexo D - Excepciones
 
