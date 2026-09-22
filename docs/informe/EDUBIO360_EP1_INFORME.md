@@ -718,7 +718,7 @@ Las excepciones sirven como una capa adicional dentro de la lógica PL/SQL. Perm
 
 En EDUBIO360 se combinan las restricciones del modelo con el manejo de excepciones para evitar trabajar silenciosamente con datos incorrectos.
 
-Los tres casos (`NO_DATA_FOUND`, `TOO_MANY_ROWS` y `e_arancel_invalido`) fueron ejecutados y verificados en Oracle SQL Developer. La salida real se encuentra documentada en `docs/evidencias/ejecucion-oracle/04_excepciones.txt`.
+Los tres casos (`NO_DATA_FOUND`, `TOO_MANY_ROWS` y `e_arancel_invalido`) fueron ejecutados y verificados en Oracle SQL Developer. La salida real se encuentra documentada en `docs/evidencias/ejecucion-oracle/04_excepciones.txt` y también se guardaron capturas visuales individuales de cada ejecución.
 
 
 # 7. Evaluación de procedimientos, funciones, packages y triggers
@@ -1210,6 +1210,9 @@ Las evidencias se encuentran en `docs/evidencias/ejecucion-oracle/` e incluyen:
 - `03_cursores_loops.png`: ejecución de cursores y loops, mostrando un área y sus ofertas;
 - `03b_cursores_estilo_clase.txt`: ejecución real del cursor parametrizado con `OPEN`, `FETCH`, `%NOTFOUND`, `CLOSE` y de los cursores anidados;
 - `04_excepciones.txt`: salida real de `NO_DATA_FOUND`, `TOO_MANY_ROWS` y de la excepción `e_arancel_invalido`;
+- `04a_no_data_found.png`: captura de la ejecución real de `NO_DATA_FOUND`;
+- `04b_too_many_rows.png`: captura de la ejecución real de `TOO_MANY_ROWS`;
+- `04c_excepcion_usuario.png`: captura de la ejecución real de `e_arancel_invalido`;
 - `05_validacion_final.png`: validación de los conteos esperados de todas las tablas, incluyendo 106.555 registros en `STAGING_MATRICULA` y `MATRICULA_HISTORICA`.
 
 La validación final concluyó con el mensaje `VERIFICACION FINAL OK: EduBio 360 listo.`, confirmando que los conteos esperados coinciden con los datos cargados.
