@@ -17,11 +17,11 @@ EDUBIO360 es un proyecto que busca ordenar información de educación superior p
 
 El archivo original contiene 106.555 registros y 28 columnas. El problema es que todos esos datos vienen juntos en una estructura plana. Esto significa que en una misma tabla se repiten muchas veces nombres de instituciones, carreras, comunas y otros valores. Por esta razón, la información se separa en tablas relacionadas dentro de Oracle.
 
-La idea principal es que la información no dependa siempre del archivo original. Una vez organizada en Oracle, es posible consultar, por ejemplo, qué institución imparte una carrera, dónde se ofrece y cuánto cuesta. También se utiliza PL/SQL para realizar procesos sobre esos datos. En esta evaluación se trabaja con RECORD, VARRAY, cursores, loops y excepciones, relacionando cada ejercicio con una necesidad real de EDUBIO360.
+La idea principal es que la información no dependa siempre del archivo original. Una vez organizada en Oracle, es posible consultar, por ejemplo, qué institución imparte una carrera, dónde se ofrece y cuánto cuesta. También se utiliza PL/SQL para realizar procesos sobre esos datos mediante RECORD, VARRAY, cursores, loops y excepciones. Cada uno de estos elementos se relaciona con necesidades concretas de procesamiento dentro de EDUBIO360.
 
 ## 1.2 Alcance
 
-En esta evaluación el trabajo se concentra solamente en la parte de base de datos de EDUBIO360. La interfaz completa del sistema no forma parte de este informe. El objetivo es dejar organizada la información y demostrar cómo puede procesarse desde Oracle.
+El trabajo se concentra en la capa de base de datos de EDUBIO360. La interfaz completa del sistema queda fuera del alcance de este informe. El objetivo es organizar la información académica en Oracle y establecer una base estructurada para su procesamiento mediante SQL y PL/SQL.
 
 El alcance incluye el modelo de datos en Oracle, la normalización, las claves primarias y foráneas, la carga de los datos y los bloques PL/SQL. Primero la información original se recibe en una tabla de staging, que funciona como una zona temporal. Desde ahí los datos se revisan y se transforman antes de llevarlos a las tablas finales.
 
@@ -55,7 +55,7 @@ Para desarrollar esta parte de EDUBIO360 se utilizaron las siguientes tecnologí
 - **Excel / CSV:** corresponde al formato de origen de los datos utilizados en el proyecto.
 - **GitHub:** se utiliza para mantener los scripts, documentación y avances del proyecto versionados.
 
-Estas herramientas permiten que el proceso pueda repetirse y revisarse desde la carga inicial de los datos hasta las consultas y ejercicios PL/SQL desarrollados para la evaluación.
+Estas herramientas permiten mantener un flujo reproducible desde la carga inicial de los datos hasta las consultas y bloques PL/SQL utilizados para procesar la información.
 
 # 2. Contexto de negocio y datos a procesar
 
