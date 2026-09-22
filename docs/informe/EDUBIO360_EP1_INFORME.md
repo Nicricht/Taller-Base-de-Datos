@@ -545,7 +545,7 @@ En este caso los cursores son útiles porque se necesita recorrer varias filas y
 
 El cursor parametrizado evita repetir una consulta distinta para cada área y permite reutilizar el mismo bloque cambiando solamente el parámetro.
 
-Para operaciones masivas simples, una consulta SQL directa puede ser más eficiente que procesar cada fila con un cursor. En EDUBIO360 el cursor se utiliza porque se necesita un procesamiento controlado y anidado de los resultados, con una relación directa entre cada área de conocimiento y sus respectivas ofertas.
+Para operaciones masivas simples, una consulta SQL directa puede ser más eficiente que procesar cada fila con un cursor. En EDUBIO360 el cursor se utiliza porque se necesita un procesamiento controlado y anidado de los resultados, con una relación directa entre cada área de conocimiento y sus respectivas ofertas. Además, el cursor parametrizado reúne información proveniente de varias tablas relacionadas, entre ellas DENOMINACION_CARRERA, CARRERA, NIVEL_CARRERA, OFERTA_ACADEMICA, INSTITUCION y PLAN_OFERTA, permitiendo procesar una salida integrada sin duplicar la lógica para cada área.
 
 El bloque fue ejecutado y verificado en Oracle SQL Developer. La evidencia correspondiente se encuentra en `docs/evidencias/ejecucion-oracle/03_cursores_loops.png`.
 
@@ -1333,15 +1333,18 @@ END;
 
 ## 9.3 Diagramas y modelos
 
-El modelo de datos utilizado en el proyecto se encuentra documentado en los siguientes archivos del repositorio:
+El informe final incorpora el modelo relacional de EDUBIO360 generado desde el esquema real mediante Oracle SQL Developer Data Modeler. El diagrama contiene las 19 tablas normalizadas del negocio y sus relaciones basadas en las claves primarias y foráneas existentes en Oracle.
 
-- `docs/diagrama-er.dbml`: definición del diagrama entidad-relación.
-- `docs/modelo-datos-final.md`: explicación del modelo final, entidades, relaciones y decisiones.
-- `docs/normalizacion-3fn.md`: justificación del proceso de normalización hasta 3FN.
-- `database/01_create_tables.sql`: creación física de las tablas y relaciones en Oracle.
-- `database/10_assert_final.sql`: validación de conteos esperados después de la carga.
+Como respaldo adicional, el modelo también se encuentra documentado en:
 
-La tabla `STAGING_MATRICULA` se mantiene fuera del DER normalizado porque corresponde a una tabla técnica de recepción y transformación de los datos originales.
+- `docs/diagrama-er.dbml`: definición estructural del modelo.
+- `docs/modelo-datos-final.md`: explicación de entidades, relaciones y decisiones.
+- `docs/normalizacion-3fn.md`: justificación de la normalización hasta 3FN.
+- `database/01_create_tables.sql`: creación física de las tablas.
+- `database/02_constraints.sql`: claves primarias, foráneas, restricciones UNIQUE y CHECK.
+- `database/10_assert_final.sql`: validación de conteos después de la carga.
+
+La tabla `STAGING_MATRICULA` se mantiene fuera del modelo relacional normalizado porque corresponde a una tabla técnica de recepción y transformación de los datos originales.
 
 ## 9.4 Evidencias de ejecución
 
