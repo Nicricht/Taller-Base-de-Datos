@@ -916,7 +916,7 @@ Finalmente, cualquier cambio futuro en el modelo debería mantener el mismo crit
 
 ## 9.1 Código completo utilizado en los bloques PL/SQL
 
-Los siguientes scripts corresponden al código utilizado en las secciones prácticas de esta evaluación. También se encuentran separados dentro de la carpeta `plsql/` del repositorio.
+Los siguientes scripts corresponden al código PL/SQL utilizado en EDUBIO360. Cada archivo también se encuentra disponible de forma independiente dentro de la carpeta `plsql/` del repositorio.
 
 ### Anexo A - RECORD
 
@@ -1098,7 +1098,7 @@ END;
 
 Archivo: `plsql/03b_cursores_estilo_clase.sql`
 
-Este archivo contiene dos demostraciones adicionales. La primera recorre manualmente un cursor con parámetro mediante `OPEN`, `FETCH`, `%NOTFOUND` y `CLOSE`. La segunda declara un cursor principal de áreas y un cursor parametrizado de ofertas dentro del mismo bloque, utilizando loops anidados.
+Este archivo reúne dos implementaciones complementarias del procesamiento con cursores. La primera recorre manualmente un cursor con parámetro mediante `OPEN`, `FETCH`, `%NOTFOUND` y `CLOSE`. La segunda declara un cursor principal de áreas y un cursor parametrizado de ofertas dentro del mismo bloque, utilizando loops anidados.
 
 ```sql
 SET SERVEROUTPUT ON;
@@ -1325,7 +1325,7 @@ La tabla `STAGING_MATRICULA` se mantiene fuera del DER normalizado porque corres
 
 ## 9.3 Evidencias de ejecución
 
-Las evidencias utilizadas corresponden a ejecuciones reales realizadas en Oracle SQL Developer. No se utilizaron resultados simulados.
+Las evidencias corresponden a ejecuciones realizadas en Oracle SQL Developer y permiten respaldar el funcionamiento de los bloques PL/SQL y las validaciones de la base de datos.
 
 Las evidencias se encuentran en `docs/evidencias/ejecucion-oracle/` e incluyen:
 
