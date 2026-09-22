@@ -791,7 +791,7 @@ Una limitación sería usar la función demasiadas veces sobre una gran cantidad
 
 ## 7.3 Package
 
-Un Package permite agrupar elementos PL/SQL relacionados, como procedimientos, funciones, tipos y otras definiciones.
+Un package permite agrupar elementos PL/SQL relacionados, como procedimientos, funciones, tipos y otras definiciones.
 
 Para EDUBIO360 se propone como idea futura:
 
@@ -815,13 +815,13 @@ Esto ayudaría a mantener organizadas las funciones y procedimientos del mismo d
 
 También podría facilitar el mantenimiento porque las operaciones académicas quedarían agrupadas bajo un mismo módulo. Además, el package ayuda a manejar dependencias de una forma más ordenada. Por ejemplo, si `pr_generar_reporte_ofertas` utiliza `fn_clasificar_arancel`, ambas operaciones pueden mantenerse dentro de `pkg_academico` y queda más claro que pertenecen al mismo conjunto de lógica. Si cambia una tabla o una columna de la que dependen estos objetos, será necesario revisar esas dependencias y, si corresponde, recompilar los objetos afectados.
 
-Como posible dificultad, un Package demasiado grande puede terminar mezclando responsabilidades diferentes. Por eso sería necesario separar los objetos según su función y evitar agrupar todo solo por comodidad.
+Como posible dificultad, un package demasiado grande puede terminar mezclando responsabilidades diferentes. Por eso sería necesario separar los objetos según su función y evitar agrupar todo solo por comodidad.
 
 ## 7.4 Trigger
 
-Un Trigger es un objeto que se ejecuta automáticamente cuando ocurre un evento en la base de datos, como `INSERT`, `UPDATE` o `DELETE`.
+Un trigger es un objeto que se ejecuta automáticamente cuando ocurre un evento en la base de datos, como `INSERT`, `UPDATE` o `DELETE`.
 
-En EDUBIO360 se propone utilizar un Trigger en una fase futura para auditar cambios sensibles, especialmente modificaciones relacionadas con los valores de arancel.
+En EDUBIO360 se propone utilizar un trigger en una fase futura para auditar cambios sensibles, especialmente modificaciones relacionadas con los valores de arancel.
 
 El funcionamiento podría ser:
 
@@ -837,11 +837,11 @@ Tabla de historial o auditoría
 
 En esa tabla se podrían guardar datos como el valor anterior, el nuevo valor, la fecha de modificación y algún identificador del usuario o proceso que realizó el cambio.
 
-Actualmente EDUBIO360 no cuenta con una operación transaccional de mantenimiento de aranceles. Por esta razón, la tabla de auditoría y el Trigger se mantienen como parte del diseño futuro hasta que exista un proceso real de actualización que justifique su incorporación.
+Actualmente EDUBIO360 no cuenta con una operación transaccional de mantenimiento de aranceles. Por esta razón, la tabla de auditoría y el trigger se mantienen como parte del diseño futuro hasta que exista un proceso real de actualización que justifique su incorporación.
 
-La ventaja del Trigger es que la auditoría podría ejecutarse automáticamente sin depender de que cada operación recuerde registrar el cambio de forma manual.
+La ventaja del trigger es que la auditoría podría ejecutarse automáticamente sin depender de que cada operación recuerde registrar el cambio de forma manual.
 
-Una posible desventaja es que la lógica se ejecuta de forma automática y puede ser menos visible para quien realiza una modificación. También podría afectar el rendimiento si se agregan demasiados Triggers o si realizan operaciones muy pesadas.
+Una posible desventaja es que la lógica se ejecuta de forma automática y puede ser menos visible para quien realiza una modificación. También podría afectar el rendimiento si se agregan demasiados triggers o si realizan operaciones muy pesadas.
 
 ## 7.5 Estrategia de interacción futura
 
@@ -854,7 +854,7 @@ Backend / API
       ↓
 PKG_ACADEMICO
       ↓
-Procedures y Functions
+procedimientos y funciones
       ↓
 Tablas Oracle
 
@@ -869,11 +869,11 @@ La idea sería repartir las responsabilidades. Un procedimiento podría ejecutar
 
 ## 7.6 Reutilización y mantenimiento
 
-El principal aporte de Procedures y Functions sería evitar repetir la misma lógica en varios lugares. Si una consulta o regla se utiliza desde distintos procesos, resulta más fácil mantener una sola versión que tener varias copias.
+El principal aporte de los procedimientos y las funciones sería evitar repetir la misma lógica en varios lugares. Si una consulta o regla se utiliza desde distintos procesos, resulta más fácil mantener una sola versión que tener varias copias.
 
 Por ejemplo, si varias partes de EDUBIO360 necesitan generar ofertas por área, conviene mantener esa lógica en un procedimiento como `pr_generar_reporte_ofertas` en vez de copiar la misma consulta en distintos procesos. Lo mismo ocurre con una función de clasificación de arancel: si cambia la regla, bastaría con modificarla en un solo lugar.
 
-Los Packages ayudarían a ordenar estos objetos según su propósito y a dejar visibles sus relaciones. Esto facilita el mantenimiento, pero también obliga a revisar las dependencias. Si un procedimiento depende de una tabla y esa tabla cambia de estructura, el objeto puede quedar inválido o necesitar una recompilación. Por eso, antes de modificar tablas utilizadas por el package, sería necesario revisar qué procedimientos y funciones dependen de ellas.
+Los packages ayudarían a ordenar estos objetos según su propósito y a dejar visibles sus relaciones. Esto facilita el mantenimiento, pero también obliga a revisar las dependencias. Si un procedimiento depende de una tabla y esa tabla cambia de estructura, el objeto puede quedar inválido o necesitar una recompilación. Por eso, antes de modificar tablas utilizadas por el package, sería necesario revisar qué procedimientos y funciones dependen de ellas.
 
 ## 7.7 Riesgos y limitaciones
 
@@ -884,9 +884,9 @@ Entre los aspectos que habría que revisar antes de implementarlos se encuentran
 - **Rendimiento:** un procedimiento o una función con consultas muy pesadas puede tardar más de lo esperado. Un trigger también agrega trabajo cada vez que ocurre el evento que lo activa, por lo que no conviene colocar lógica pesada dentro de él.
 - **Escalabilidad:** si aumenta el volumen de ofertas, matrículas o consultas, estos objetos deben mantener tiempos de respuesta razonables y evitar procesamiento fila por fila cuando una operación SQL pueda resolver el trabajo de forma más eficiente.
 - **Mantenimiento:** si demasiadas reglas quedan dentro de Oracle, puede ser difícil saber si una operación se está resolviendo en la base de datos o en el backend. Por eso cada objeto debería tener una responsabilidad clara.
-- **Complejidad:** un Package demasiado grande o varios Triggers sobre una misma tabla pueden hacer más difícil seguir el flujo de una operación.
+- **Complejidad:** un package demasiado grande o varios triggers sobre una misma tabla pueden hacer más difícil seguir el flujo de una operación.
 - **Seguridad:** no todos los usuarios deberían poder ejecutar o modificar estos objetos. Los permisos tendrían que entregarse solamente a los usuarios o procesos que realmente los necesiten.
-- **Dependencias:** Procedures, Functions y Packages pueden depender de tablas, columnas u otros objetos. Si uno de esos elementos cambia, hay que revisar los objetos dependientes y, si corresponde, recompilarlos.
+- **Dependencias:** Los procedimientos, las funciones y los packages pueden depender de tablas, columnas u otros objetos. Si uno de esos elementos cambia, hay que revisar los objetos dependientes y, si corresponde, recompilarlos.
 - **Integridad y auditoría:** los triggers pueden ayudar a registrar cambios o reforzar ciertas reglas, pero no deben reemplazar restricciones como claves primarias, claves foráneas, `CHECK` o `NOT NULL`. En EDUBIO360 se utilizarían como apoyo, por ejemplo para dejar un historial de modificaciones de arancel.
 
 Por estas razones, en EDUBIO360 estos objetos se incorporarían cuando exista una operación real que justifique su uso. La estrategia definida permite mantener una separación clara entre la lógica ya implementada en PL/SQL y los objetos almacenados previstos para futuras necesidades de procesamiento, reutilización y auditoría.
