@@ -404,7 +404,7 @@ Los bloques fueron ejecutados y verificados en Oracle SQL Developer. Las evidenc
 
 # 5. Cursores y loops
 
-Para esta parte se utiliza el archivo `plsql/03_cursor_loops.sql`. En el script se trabajan dos casos: un cursor explícito sin parámetros y un cursor explícito con parámetro. También se utilizan loops anidados para recorrer áreas de conocimiento y, dentro de cada área, sus ofertas académicas.
+El procesamiento de ofertas por área se implementa en `plsql/03_cursor_loops.sql` mediante un cursor explícito sin parámetros, un cursor explícito con parámetro y loops anidados. Esta combinación permite recorrer las áreas de conocimiento y consultar, dentro de cada una, sus ofertas académicas.
 
 ## 5.1 Qué es un cursor explícito
 
@@ -414,7 +414,7 @@ En EDUBIO360 esto es útil porque muchas consultas no entregan un solo resultado
 
 ## 5.2 Cursor sin parámetros
 
-Primero se agregó un cursor simple llamado `c_areas`:
+El cursor `c_areas` obtiene las áreas de conocimiento registradas:
 
 ```sql
 CURSOR c_areas IS
@@ -425,7 +425,7 @@ CURSOR c_areas IS
 
 Este cursor no recibe ningún parámetro. Siempre ejecuta la misma consulta y obtiene las áreas de conocimiento existentes en la tabla `AREA_CONOCIMIENTO`.
 
-En este ejercicio `c_areas` corresponde al caso más simple, porque la consulta no cambia según un valor externo. En cambio, `c_ofertas_por_area` es un cursor más complejo porque recibe `p_id_area`, utiliza ese valor dentro del `WHERE` y se vuelve a ejecutar con un área distinta durante el recorrido. De esta manera, una sola definición de cursor sirve para Salud, Tecnología, Educación y las demás áreas, sin tener que escribir una consulta diferente para cada una.
+`c_areas` corresponde al caso más simple porque la consulta no cambia según un valor externo. En cambio, `c_ofertas_por_area` recibe `p_id_area`, utiliza ese valor dentro del `WHERE` y se ejecuta con un área distinta durante el recorrido. De esta manera, una sola definición de cursor sirve para Salud, Tecnología, Educación y las demás áreas, sin tener que escribir una consulta diferente para cada una.
 
 Después se recorre con:
 
@@ -437,7 +437,7 @@ FOR a IN c_areas LOOP
 END LOOP;
 ```
 
-Este ejemplo sirve para demostrar el funcionamiento básico de un cursor explícito sin parámetros. El cursor mantiene una consulta definida y el LOOP permite recorrer todos los registros que devuelve.
+El cursor mantiene una consulta definida sobre `AREA_CONOCIMIENTO` y el LOOP permite recorrer todos los registros obtenidos. Al no recibir parámetros, su conjunto de resultados depende únicamente de la consulta declarada.
 
 ## 5.3 Cursor explícito con parámetro
 
@@ -483,7 +483,7 @@ La diferencia principal entre los dos cursores utilizados es que `c_areas` siemp
 
 El bloque utiliza más de un LOOP de forma simultánea.
 
-En la versión complementaria orientada a la estructura trabajada en clases, ambos cursores se declaran en el mismo bloque. Primero se define `c_areas` como cursor principal y luego `c_ofertas_por_area(p_id_area)` como cursor dependiente.
+En `plsql/03b_cursores_estilo_clase.sql` ambos cursores se declaran dentro del mismo bloque. `c_areas` funciona como cursor principal y `c_ofertas_por_area(p_id_area)` como cursor dependiente de cada área recorrida.
 
 El recorrido exterior utiliza directamente el cursor principal:
 
@@ -555,7 +555,7 @@ En este caso los cursores son útiles porque se necesita recorrer varias filas y
 
 El cursor parametrizado evita repetir una consulta distinta para cada área y permite reutilizar el mismo bloque cambiando solamente el parámetro.
 
-Para operaciones masivas simples, una consulta SQL directa puede ser más eficiente que procesar cada fila con un cursor. En este proyecto el cursor se utiliza porque se necesita un procesamiento controlado y anidado de los resultados, que es precisamente el caso trabajado en la evaluación.
+Para operaciones masivas simples, una consulta SQL directa puede ser más eficiente que procesar cada fila con un cursor. En EDUBIO360 el cursor se utiliza porque se necesita un procesamiento controlado y anidado de los resultados, con una relación directa entre cada área de conocimiento y sus respectivas ofertas.
 
 El bloque fue ejecutado y verificado en Oracle SQL Developer. La evidencia correspondiente se encuentra en `docs/evidencias/ejecucion-oracle/03_cursores_loops.png`.
 
