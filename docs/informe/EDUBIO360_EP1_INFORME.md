@@ -86,7 +86,7 @@ La fuente utilizada contiene 106.555 registros y 28 columnas. Entre los principa
 - género, edad, año y semestre de ingreso;
 - información de acreditación institucional.
 
-Antes de llevar estos datos al modelo final, se cargan en la tabla `STAGING_MATRICULA`. Esta tabla mantiene la estructura original de la fuente y permite revisar los datos antes de separarlos en las tablas normalizadas.
+Antes de llevar estos datos al modelo final, se cargan en `STAGING_MATRICULA`, una tabla temporal de carga que conserva la estructura original de la fuente. Su función es recibir y revisar los datos antes de transformarlos y distribuirlos en las tablas normalizadas.
 
 ## 2.3 Información que se necesita generar
 
