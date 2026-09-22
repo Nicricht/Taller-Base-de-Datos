@@ -13,11 +13,15 @@
 
 ## 1.1 Descripción del proyecto
 
-EDUBIO360 es un proyecto que busca ordenar información de educación superior para que una persona pueda revisar y comparar alternativas de estudio de una forma más clara. Para desarrollar el proyecto se utiliza un archivo de matrículas de educación superior de la Región del Biobío. Ese archivo contiene información de instituciones, carreras, comunas, modalidades, jornadas, valores de matrícula, aranceles y otros datos relacionados con cada oferta académica.
+EDUBIO360 es un proyecto orientado a organizar información de educación superior para que una persona pueda revisar y comparar alternativas de estudio de una forma más clara. Para desarrollar el proyecto se utiliza un archivo de matrículas de educación superior de la Región del Biobío, el cual contiene información de instituciones, carreras, comunas, modalidades, jornadas, valores de matrícula, aranceles y otros datos asociados a cada oferta académica.
 
-El archivo original contiene 106.555 registros y 28 columnas. El problema es que todos esos datos vienen juntos en una estructura plana. Esto significa que en una misma tabla se repiten muchas veces nombres de instituciones, carreras, comunas y otros valores. Por esta razón, la información se separa en tablas relacionadas dentro de Oracle.
+El archivo original contiene 106.555 registros y 28 columnas. La principal dificultad es que toda la información se encuentra concentrada en una estructura plana, por lo que nombres de instituciones, carreras, comunas y otros valores se repiten muchas veces. Trabajar directamente sobre esa estructura haría más difícil mantener los datos ordenados, controlar inconsistencias y realizar consultas que relacionen correctamente los distintos elementos de una oferta académica.
 
-La idea principal es que la información no dependa siempre del archivo original. Una vez organizada en Oracle, es posible consultar, por ejemplo, qué institución imparte una carrera, dónde se ofrece y cuánto cuesta. También se utiliza PL/SQL para realizar procesos sobre esos datos mediante RECORD, VARRAY, cursores, loops y excepciones. Cada uno de estos elementos se relaciona con necesidades concretas de procesamiento dentro de EDUBIO360.
+Por esta razón, la información se transforma y distribuye en tablas relacionadas dentro de Oracle. El modelo separa conceptos como institución, carrera, ubicación, modalidad, jornada y plan de estudio, permitiendo que cada dato tenga una función definida dentro de la base. Esta organización facilita consultas más precisas y reduce la repetición innecesaria de información.
+
+La base de datos constituye el núcleo de información de EDUBIO360. A partir de ella es posible responder preguntas como qué instituciones imparten una determinada carrera, en qué comuna se encuentra disponible, bajo qué modalidad o jornada se ofrece y cuáles son sus valores de matrícula y arancel. De esta forma, los datos dejan de funcionar solamente como un archivo de consulta y pasan a formar parte de una estructura preparada para apoyar comparaciones académicas.
+
+Además de organizar la información, el proyecto utiliza PL/SQL para procesar los datos almacenados. RECORD permite reunir en una sola estructura los principales atributos de una oferta académica, VARRAY permite trabajar con grupos limitados de alternativas, los cursores y loops permiten recorrer conjuntos de resultados y las excepciones permiten controlar situaciones que podrían interrumpir el procesamiento. Estos elementos se integran con necesidades concretas de EDUBIO360 y complementan el modelo relacional desarrollado en Oracle.
 
 ## 1.2 Alcance
 
