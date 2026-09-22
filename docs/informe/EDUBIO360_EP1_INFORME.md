@@ -889,11 +889,11 @@ Por estas razones, en EDUBIO360 estos objetos se incorporarían cuando exista un
 
 # 8. Conclusión
 
-En esta evaluación se parte de un archivo real de 106.555 registros y 28 columnas. El trabajo principal consiste en tomar esa información, que originalmente estaba toda junta, y organizarla en una base de datos Oracle con tablas relacionadas. La normalización permite separar información repetida y dejar cada dato en un lugar más claro dentro del modelo.
+EDUBIO360 parte de un archivo real de 106.555 registros y 28 columnas. La información, que originalmente se encontraba concentrada en una estructura plana, fue organizada en una base de datos Oracle compuesta por tablas relacionadas. La normalización permitió reducir repeticiones y separar cada concepto dentro del modelo de datos.
 
 También se utilizaron distintos elementos de PL/SQL relacionados directamente con las necesidades del proyecto. RECORD permitió reunir en una sola estructura los datos principales de una oferta académica. VARRAY permitió manejar un grupo limitado de resultados. Los cursores permitieron recorrer varias filas y, mediante loops anidados, organizar las ofertas según su área de conocimiento. Finalmente, el manejo de excepciones permitió controlar situaciones como búsquedas sin resultados y valores inválidos definidos por la lógica del proyecto.
 
-Otro punto importante fue evaluar cómo se podrían incorporar en el futuro procedimientos almacenados, funciones, packages y triggers. Estos objetos no se agregaron solo para cumplir cantidad, sino que se dejaron asociados a necesidades concretas como generación de reportes, clasificación de aranceles, organización de lógica académica y auditoría de cambios.
+También se definió cómo podrían incorporarse en el futuro procedimientos almacenados, funciones, packages y triggers. Cada objeto quedó asociado a una necesidad concreta del proyecto, como la generación de reportes, la clasificación de aranceles, la organización de lógica académica y la auditoría de cambios.
 
 ## 8.1 Impacto del proyecto
 
@@ -905,11 +905,11 @@ La base de datos queda preparada para ser utilizada posteriormente por otros com
 
 ## 8.2 Recomendaciones y trabajo futuro
 
-Como parte del cierre de esta evaluación se ejecutaron los scripts principales en Oracle SQL Developer y se guardaron evidencias reales de su funcionamiento. Se verificaron RECORD, VARRAY, cursores, loops, excepciones y los conteos finales de las tablas.
+Los scripts principales fueron ejecutados en Oracle SQL Developer y se conservaron evidencias reales de su funcionamiento. Las verificaciones incluyen RECORD, VARRAY, cursores, loops, excepciones y los conteos finales de las tablas.
 
-También sería conveniente incorporar los stored objects propuestos cuando el proyecto tenga operaciones reales que los necesiten. Por ejemplo, un procedimiento para generar reportes, una función para clasificar aranceles, un package para organizar lógica académica y un trigger para auditoría cuando existan actualizaciones reales sobre información sensible.
+Los objetos almacenados propuestos podrían incorporarse cuando el proyecto disponga de operaciones reales que los necesiten. Entre ellos se consideran un procedimiento para generar reportes, una función para clasificar aranceles, un package para organizar lógica académica y un trigger de auditoría para futuras actualizaciones de información sensible.
 
-Finalmente, cualquier cambio futuro en el modelo debería mantener la misma idea utilizada en esta evaluación: no agregar tablas, reglas u objetos sin una necesidad concreta y comprobable dentro de EDUBIO360.
+Finalmente, cualquier cambio futuro en el modelo debería mantener el mismo criterio de diseño: incorporar tablas, reglas u objetos solamente cuando respondan a una necesidad concreta y comprobable dentro de EDUBIO360.
 
 
 # 9. Anexos
