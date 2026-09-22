@@ -882,6 +882,7 @@ Aunque estos objetos pueden ser útiles, no conviene utilizarlos sin una necesid
 Entre los aspectos que habría que revisar antes de implementarlos se encuentran:
 
 - **Rendimiento:** un procedimiento o una función con consultas muy pesadas puede tardar más de lo esperado. Un trigger también agrega trabajo cada vez que ocurre el evento que lo activa, por lo que no conviene colocar lógica pesada dentro de él.
+- **Escalabilidad:** si aumenta el volumen de ofertas, matrículas o consultas, estos objetos deben mantener tiempos de respuesta razonables y evitar procesamiento fila por fila cuando una operación SQL pueda resolver el trabajo de forma más eficiente.
 - **Mantenimiento:** si demasiadas reglas quedan dentro de Oracle, puede ser difícil saber si una operación se está resolviendo en la base de datos o en el backend. Por eso cada objeto debería tener una responsabilidad clara.
 - **Complejidad:** un Package demasiado grande o varios Triggers sobre una misma tabla pueden hacer más difícil seguir el flujo de una operación.
 - **Seguridad:** no todos los usuarios deberían poder ejecutar o modificar estos objetos. Los permisos tendrían que entregarse solamente a los usuarios o procesos que realmente los necesiten.
