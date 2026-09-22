@@ -925,7 +925,7 @@ La validación final de la base de datos confirmó los siguientes conteos:
 
 | Tabla | Filas validadas |
 |---|---:|
-| STAGING_MATRICULA | 106.555 |
+| STAGING_MATRICULA (tabla temporal de carga) | 106.555 |
 | REGION | 1 |
 | PROVINCIA | 3 |
 | COMUNA | 9 |
