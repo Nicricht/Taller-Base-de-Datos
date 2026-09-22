@@ -562,9 +562,11 @@ El bloque fue ejecutado y verificado en Oracle SQL Developer. La evidencia corre
 
 # 6. Control de excepciones
 
-Para esta parte se utiliza el archivo `plsql/04_excepciones.sql`. En el script se trabajan dos casos: una excepción predefinida por Oracle y una excepción creada dentro del bloque para representar una regla del proyecto.
+Para esta parte se utiliza el archivo `plsql/04_excepciones.sql`. En el script se trabajan tres casos: dos excepciones predefinidas por Oracle (`NO_DATA_FOUND` y `TOO_MANY_ROWS`) y una excepción definida dentro del bloque para representar una regla propia del proyecto.
 
-## 6.1 Excepción predefinida por Oracle
+## 6.1 Excepciones predefinidas por Oracle
+
+### 6.1.1 NO_DATA_FOUND
 
 Oracle tiene excepciones que ya vienen definidas y que se producen cuando ocurre una situación conocida durante la ejecución de un bloque PL/SQL.
 
@@ -608,6 +610,38 @@ EXCEPTION
 Con esto el bloque no termina mostrando solamente un error técnico de Oracle, sino que entrega un mensaje entendible indicando que la carrera buscada no existe.
 
 En EDUBIO360 este tipo de excepción puede ser útil cuando se intenta consultar una carrera, institución u oferta mediante un identificador que no se encuentra en la base de datos.
+
+### 6.1.2 TOO_MANY_ROWS
+
+La segunda excepción predefinida utilizada es `TOO_MANY_ROWS`. Esta excepción se produce cuando una instrucción `SELECT INTO` espera obtener una sola fila, pero la consulta devuelve más de una.
+
+En el ejercicio se utiliza el área con identificador 1:
+
+```sql
+v_id_area AREA_CONOCIMIENTO.id_area%TYPE := 1;
+```
+
+Después se ejecuta una consulta que intenta guardar en una sola variable el nombre de una carrera perteneciente a esa área:
+
+```sql
+SELECT dc.nombre
+INTO v_nombre
+FROM DENOMINACION_CARRERA dc
+WHERE dc.id_area = v_id_area;
+```
+
+Como el área contiene más de una carrera, la consulta devuelve varias filas y Oracle genera `TOO_MANY_ROWS`. El bloque controla esa situación de la siguiente forma:
+
+```sql
+EXCEPTION
+    WHEN TOO_MANY_ROWS THEN
+        DBMS_OUTPUT.PUT_LINE(
+            'TOO_MANY_ROWS: el area ' || v_id_area ||
+            ' contiene mas de una carrera.'
+        );
+```
+
+Este caso permite mostrar una situación distinta a `NO_DATA_FOUND`: en una se obtiene cero filas y en la otra se obtienen más filas de las que `SELECT INTO` puede almacenar.
 
 ## 6.2 Excepción definida por el usuario
 
@@ -655,6 +689,9 @@ En EDUBIO360:
 NO_DATA_FOUND
 → Oracle detecta que una consulta no devolvió filas.
 
+TOO_MANY_ROWS
+→ Oracle detecta que SELECT INTO devolvió más de una fila cuando se esperaba solo una.
+
 e_arancel_invalido
 → En EDUBIO360 se define que un arancel negativo no debe continuar como un valor válido.
 ```
@@ -665,7 +702,7 @@ Por lo tanto, las excepciones predefinidas se utilizan cuando Oracle ya reconoce
 
 Una excepción permite controlar lo que ocurre cuando un bloque encuentra un problema. En vez de dejar que el programa termine solamente con un mensaje técnico de Oracle, la situación puede detectarse y responderse de una forma más clara.
 
-Por ejemplo, si se intenta consultar una oferta que ya no existe, se puede controlar `NO_DATA_FOUND` y entregar un mensaje claro.
+Por ejemplo, si se intenta consultar una oferta que ya no existe, se puede controlar `NO_DATA_FOUND` y entregar un mensaje claro. Si una consulta `SELECT INTO` devuelve varias filas cuando se esperaba solo una, se puede controlar `TOO_MANY_ROWS`.
 
 También se pueden definir excepciones propias para validar reglas antes de continuar con una operación. El ejemplo del arancel negativo muestra esta idea de forma simple.
 
@@ -681,7 +718,7 @@ Las excepciones sirven como una capa adicional dentro de la lógica PL/SQL. Perm
 
 En EDUBIO360 se combinan las restricciones del modelo con el manejo de excepciones para evitar trabajar silenciosamente con datos incorrectos.
 
-Los dos casos fueron ejecutados y verificados en Oracle SQL Developer. La salida correspondiente se encuentra documentada en `docs/evidencias/ejecucion-oracle/04_excepciones.txt`.
+Los casos de `NO_DATA_FOUND` y `e_arancel_invalido` ya fueron ejecutados y verificados en Oracle SQL Developer. El nuevo caso `TOO_MANY_ROWS` queda incorporado al script y debe ejecutarse antes de cerrar la evidencia definitiva de esta sección.
 
 
 # 7. Evaluación de procedimientos, funciones, packages y triggers
@@ -1074,6 +1111,10 @@ Archivo: `plsql/04_excepciones.sql`
 ```sql
 SET SERVEROUTPUT ON;
 
+PROMPT ==========================================
+PROMPT EDUBIO360 - Excepcion NO_DATA_FOUND
+PROMPT ==========================================
+
 DECLARE
     v_nombre DENOMINACION_CARRERA.nombre%TYPE;
     v_nivel NIVEL_CARRERA.nombre%TYPE;
@@ -1082,11 +1123,15 @@ BEGIN
     SELECT dc.nombre, nc.nombre
     INTO v_nombre, v_nivel
     FROM CARRERA c
-    JOIN DENOMINACION_CARRERA dc ON dc.id_denominacion = c.id_denominacion
-    JOIN NIVEL_CARRERA nc ON nc.id_nivel_carrera = c.id_nivel_carrera
+    JOIN DENOMINACION_CARRERA dc
+        ON dc.id_denominacion = c.id_denominacion
+    JOIN NIVEL_CARRERA nc
+        ON nc.id_nivel_carrera = c.id_nivel_carrera
     WHERE c.id_carrera = v_id_carrera;
 
-    DBMS_OUTPUT.PUT_LINE('Carrera encontrada: ' || v_nombre || ' (' || v_nivel || ')');
+    DBMS_OUTPUT.PUT_LINE(
+        'Carrera encontrada: ' || v_nombre || ' (' || v_nivel || ')'
+    );
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
         DBMS_OUTPUT.PUT_LINE(
@@ -1094,6 +1139,35 @@ EXCEPTION
         );
 END;
 /
+
+PROMPT ==========================================
+PROMPT EDUBIO360 - Excepcion TOO_MANY_ROWS
+PROMPT ==========================================
+
+DECLARE
+    v_nombre  DENOMINACION_CARRERA.nombre%TYPE;
+    v_id_area AREA_CONOCIMIENTO.id_area%TYPE := 1;
+BEGIN
+    SELECT dc.nombre
+    INTO v_nombre
+    FROM DENOMINACION_CARRERA dc
+    WHERE dc.id_area = v_id_area;
+
+    DBMS_OUTPUT.PUT_LINE(
+        'Carrera encontrada: ' || v_nombre
+    );
+EXCEPTION
+    WHEN TOO_MANY_ROWS THEN
+        DBMS_OUTPUT.PUT_LINE(
+            'TOO_MANY_ROWS: el area ' || v_id_area ||
+            ' contiene mas de una carrera.'
+        );
+END;
+/
+
+PROMPT ==========================================
+PROMPT EDUBIO360 - Excepcion definida por usuario
+PROMPT ==========================================
 
 DECLARE
     e_arancel_invalido EXCEPTION;
