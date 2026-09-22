@@ -1,17 +1,27 @@
-EDUBIO360 - Evidencia de ejecución Oracle
-Archivo relacionado: plsql/04_excepciones.sql
+EDUBIO360 - Evidencia real de ejecución de excepciones
+Oracle SQL Developer
 
-Resultado observado en Oracle SQL Developer:
+1. Excepción predefinida: NO_DATA_FOUND
 
+Salida:
 NO_DATA_FOUND: no existe una carrera con el ID -999
 
 Procedimiento PL/SQL terminado correctamente.
 
+
+2. Excepción predefinida: TOO_MANY_ROWS
+
+Salida:
+TOO_MANY_ROWS: el area 1 contiene mas de una carrera.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+3. Excepción definida por el usuario: e_arancel_invalido
+
+Salida:
 EXCEPCION DE USUARIO: el arancel no puede ser negativo.
 
 Procedimiento PL/SQL terminado correctamente.
 
-La ejecución demuestra:
-- Excepción predefinida de Oracle: NO_DATA_FOUND.
-- Excepción definida por el usuario: e_arancel_invalido.
-- Ambos bloques PL/SQL finalizan correctamente.
+Los tres casos fueron ejecutados de forma real en Oracle SQL Developer.
