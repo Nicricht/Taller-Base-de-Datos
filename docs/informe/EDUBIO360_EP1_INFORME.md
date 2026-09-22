@@ -263,12 +263,12 @@ El tipo creado en el bloque PL/SQL es:
 
 ```sql
 TYPE t_oferta IS RECORD (
-    carrera         DENOMINACION_CARRERA.nombre%TYPE,
-    nivel_carrera   NIVEL_CARRERA.nombre%TYPE,
-    institucion     INSTITUCION.nombre%TYPE,
-    comuna          COMUNA.nombre%TYPE,
-    modalidad       MODALIDAD.nombre%TYPE,
-    jornada         JORNADA.nombre%TYPE,
+    nombre_carrera      DENOMINACION_CARRERA.nombre%TYPE,
+    nombre_nivel        NIVEL_CARRERA.nombre%TYPE,
+    nombre_institucion  INSTITUCION.nombre%TYPE,
+    nombre_comuna       COMUNA.nombre%TYPE,
+    nombre_modalidad    MODALIDAD.nombre%TYPE,
+    nombre_jornada      JORNADA.nombre%TYPE,
     valor_matricula PLAN_OFERTA.valor_matricula%TYPE,
     valor_arancel   PLAN_OFERTA.valor_arancel%TYPE
 );
@@ -314,12 +314,12 @@ SELECT
     po.valor_matricula,
     po.valor_arancel
 INTO
-    v_oferta.carrera,
-    v_oferta.nivel_carrera,
-    v_oferta.institucion,
-    v_oferta.comuna,
-    v_oferta.modalidad,
-    v_oferta.jornada,
+    v_oferta.nombre_carrera,
+    v_oferta.nombre_nivel,
+    v_oferta.nombre_institucion,
+    v_oferta.nombre_comuna,
+    v_oferta.nombre_modalidad,
+    v_oferta.nombre_jornada,
     v_oferta.valor_matricula,
     v_oferta.valor_arancel
 ...
@@ -397,7 +397,7 @@ El VARRAY se utiliza cuando necesitamos mantener un grupo limitado de valores y 
 
 En este proyecto ayudan a que el procesamiento quede más ordenado. En vez de declarar una gran cantidad de variables independientes para una oferta, el RECORD agrupa sus datos. En el caso del VARRAY, los resultados quedan almacenados como una colección con un límite definido y luego pueden recorrerse con un LOOP.
 
-La evidencia de ejecución de ambos bloques se incorporará cuando los scripts sean ejecutados y verificados en Oracle. En el repositorio ya se encuentra el código que será utilizado para esa ejecución.
+Los bloques fueron ejecutados y verificados en Oracle SQL Developer. Las evidencias obtenidas se almacenan en `docs/evidencias/ejecucion-oracle/` junto con el resto del proyecto.
 
 
 # 5. Cursores y loops
@@ -877,7 +877,7 @@ La base de datos queda preparada para ser utilizada posteriormente por otros com
 
 ## 8.2 Recomendaciones y trabajo futuro
 
-Como siguientes pasos, se recomienda ejecutar todos los scripts en Oracle y guardar evidencias reales de su funcionamiento. Esto incluye revisar la carga de datos, validar los conteos esperados y ejecutar los bloques de RECORD, VARRAY, cursores, loops y excepciones.
+Como parte del cierre de esta evaluación se ejecutaron los scripts principales en Oracle SQL Developer y se guardaron evidencias reales de su funcionamiento. Se verificaron RECORD, VARRAY, cursores, loops, excepciones y los conteos finales de las tablas.
 
 También sería conveniente incorporar los stored objects propuestos cuando el proyecto tenga operaciones reales que los necesiten. Por ejemplo, un procedimiento para generar reportes, una función para clasificar aranceles, un package para organizar lógica académica y un trigger para auditoría cuando existan actualizaciones reales sobre información sensible.
 
@@ -899,12 +899,12 @@ SET SERVEROUTPUT ON;
 
 DECLARE
     TYPE t_oferta IS RECORD (
-        carrera         DENOMINACION_CARRERA.nombre%TYPE,
-        nivel_carrera   NIVEL_CARRERA.nombre%TYPE,
-        institucion     INSTITUCION.nombre%TYPE,
-        comuna          COMUNA.nombre%TYPE,
-        modalidad       MODALIDAD.nombre%TYPE,
-        jornada         JORNADA.nombre%TYPE,
+        nombre_carrera      DENOMINACION_CARRERA.nombre%TYPE,
+        nombre_nivel        NIVEL_CARRERA.nombre%TYPE,
+        nombre_institucion  INSTITUCION.nombre%TYPE,
+        nombre_comuna       COMUNA.nombre%TYPE,
+        nombre_modalidad    MODALIDAD.nombre%TYPE,
+        nombre_jornada      JORNADA.nombre%TYPE,
         valor_matricula PLAN_OFERTA.valor_matricula%TYPE,
         valor_arancel   PLAN_OFERTA.valor_arancel%TYPE
     );
@@ -922,12 +922,12 @@ BEGIN
         po.valor_matricula,
         po.valor_arancel
     INTO
-        v_oferta.carrera,
-        v_oferta.nivel_carrera,
-        v_oferta.institucion,
-        v_oferta.comuna,
-        v_oferta.modalidad,
-        v_oferta.jornada,
+        v_oferta.nombre_carrera,
+        v_oferta.nombre_nivel,
+        v_oferta.nombre_institucion,
+        v_oferta.nombre_comuna,
+        v_oferta.nombre_modalidad,
+        v_oferta.nombre_jornada,
         v_oferta.valor_matricula,
         v_oferta.valor_arancel
     FROM OFERTA_ACADEMICA o
@@ -942,12 +942,12 @@ BEGIN
     WHERE o.id_oferta = v_id_oferta
       AND ROWNUM = 1;
 
-    DBMS_OUTPUT.PUT_LINE('Carrera: ' || v_oferta.carrera);
-    DBMS_OUTPUT.PUT_LINE('Nivel: ' || v_oferta.nivel_carrera);
-    DBMS_OUTPUT.PUT_LINE('Institucion: ' || v_oferta.institucion);
-    DBMS_OUTPUT.PUT_LINE('Comuna: ' || v_oferta.comuna);
-    DBMS_OUTPUT.PUT_LINE('Modalidad: ' || v_oferta.modalidad);
-    DBMS_OUTPUT.PUT_LINE('Jornada: ' || v_oferta.jornada);
+    DBMS_OUTPUT.PUT_LINE('Carrera: ' || v_oferta.nombre_carrera);
+    DBMS_OUTPUT.PUT_LINE('Nivel: ' || v_oferta.nombre_nivel);
+    DBMS_OUTPUT.PUT_LINE('Institucion: ' || v_oferta.nombre_institucion);
+    DBMS_OUTPUT.PUT_LINE('Comuna: ' || v_oferta.nombre_comuna);
+    DBMS_OUTPUT.PUT_LINE('Modalidad: ' || v_oferta.nombre_modalidad);
+    DBMS_OUTPUT.PUT_LINE('Jornada: ' || v_oferta.nombre_jornada);
     DBMS_OUTPUT.PUT_LINE('Matricula: $' || v_oferta.valor_matricula);
     DBMS_OUTPUT.PUT_LINE('Arancel: $' || v_oferta.valor_arancel);
 END;
@@ -980,6 +980,7 @@ BEGIN
         JOIN NIVEL_CARRERA nc ON nc.id_nivel_carrera = c.id_nivel_carrera
         JOIN INSTITUCION i ON i.id_institucion = o.id_institucion
         JOIN PLAN_OFERTA po ON po.id_oferta = o.id_oferta
+        WHERE po.valor_arancel > 0
         ORDER BY po.valor_arancel ASC
     )
     WHERE ROWNUM <= 5;
@@ -1125,18 +1126,14 @@ La tabla `STAGING_MATRICULA` se mantiene fuera del DER normalizado porque corres
 
 ## 9.3 Evidencias de ejecución
 
-Las evidencias de ejecución deben corresponder a resultados reales obtenidos desde Oracle. Por esta razón, no se agregan capturas o salidas simuladas en este informe.
+Las evidencias utilizadas corresponden a ejecuciones reales realizadas en Oracle SQL Developer. No se utilizaron resultados simulados.
 
-Cuando se realice la ejecución final se deben guardar evidencias de:
+Las evidencias se encuentran en `docs/evidencias/ejecucion-oracle/` e incluyen:
 
-- carga de los 106.555 registros de la fuente;
-- conteos de las tablas principales;
-- ejecución del bloque RECORD;
-- ejecución del bloque VARRAY;
-- ejecución del cursor sin parámetros;
-- ejecución del cursor parametrizado con loops anidados;
-- ejecución de `NO_DATA_FOUND`;
-- ejecución de la excepción `e_arancel_invalido`;
-- validación final mediante `database/10_assert_final.sql`.
+- `01_record.txt`: salida real del bloque RECORD, con carrera, nivel, institución, comuna, modalidad, jornada, matrícula y arancel;
+- `02_varray.png`: ejecución del VARRAY con cinco ofertas y aranceles positivos;
+- `03_cursores_loops.png`: ejecución de cursores y loops, mostrando un área y sus ofertas;
+- `04_excepciones.txt`: salida real de `NO_DATA_FOUND` y de la excepción `e_arancel_invalido`;
+- `05_validacion_final.png`: validación de los conteos esperados de todas las tablas, incluyendo 106.555 registros en `STAGING_MATRICULA` y `MATRICULA_HISTORICA`.
 
-Estas evidencias se almacenarán en `docs/evidencias/ejecucion-oracle/` para mantenerlas junto al resto del proyecto.
+La validación final concluyó con el mensaje `VERIFICACION FINAL OK: EduBio 360 listo.`, confirmando que los conteos esperados coinciden con los datos cargados.
