@@ -3,7 +3,7 @@
 ## Evaluación Parcial N° 1
 **Asignatura:** Taller de Base de Datos - BDY1103  
 **Proyecto:** EDUBIO360  
-**Integrantes:** Javier Peréz y Nicolás Vega  
+**Integrantes:** Javier Pérez y Nicolás Vega  
 **Docente:** Cristian Vega  
 **Fecha de entrega:** 22 de septiembre de 2026  
 
