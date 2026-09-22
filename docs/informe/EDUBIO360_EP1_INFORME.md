@@ -399,9 +399,9 @@ En palabras simples, RECORD se utiliza cuando se necesita reunir varios datos di
 
 VARRAY se utiliza cuando se necesita guardar una lista de tamaño limitado, en este caso cinco alternativas, para después recorrerla dentro del bloque PL/SQL.
 
-En este proyecto también aportan a la eficiencia del procesamiento, pero cada uno de una forma distinta. Con RECORD se pueden manejar todos los datos de una oferta mediante una sola variable estructurada, en vez de crear y controlar muchas variables independientes. Esto hace que el bloque sea más claro y reduce la posibilidad de confundir datos que pertenecen a ofertas diferentes.
+Cada tipo compuesto aporta de una manera distinta. RECORD mejora la organización del bloque al reunir en una sola variable estructurada los datos que pertenecen a una misma oferta académica. Su principal aporte en este caso es la claridad y coherencia del procesamiento, ya que evita administrar por separado varias variables que representan una misma entidad lógica.
 
-Con VARRAY se pueden guardar varios valores relacionados dentro de una colección con un límite conocido. El bloque utiliza `BULK COLLECT` para traer varias filas de la consulta en una sola operación y almacenarlas directamente en las colecciones. Después, esos resultados se recorren con un LOOP. Para EDUBIO360 esto resulta útil cuando se necesita trabajar con un grupo pequeño y controlado de alternativas, como las cinco ofertas seleccionadas por la consulta.
+VARRAY resulta adecuado cuando se conoce de antemano un límite máximo de elementos. En EDUBIO360 se utiliza con una capacidad de cinco posiciones, suficiente para conservar el grupo reducido de alternativas definido por la consulta. Además, `BULK COLLECT` permite cargar las filas obtenidas directamente en las colecciones antes de recorrerlas con un LOOP. Por esta razón, la elección de VARRAY responde al tamaño controlado del conjunto que se necesita procesar y no a una colección de crecimiento indefinido.
 
 Los bloques fueron ejecutados y verificados en Oracle SQL Developer. Las evidencias obtenidas se almacenan en `docs/evidencias/ejecucion-oracle/` junto con el resto del proyecto.
 
