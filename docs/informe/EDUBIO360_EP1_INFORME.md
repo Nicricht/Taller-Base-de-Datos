@@ -395,7 +395,9 @@ En palabras simples, usamos RECORD cuando queremos reunir varios datos distintos
 
 Usamos VARRAY cuando queremos guardar una lista de tamaño limitado, en este caso cinco alternativas, para después recorrerla dentro del bloque PL/SQL.
 
-En este proyecto ayudan a que el procesamiento quede más ordenado. En vez de declarar una gran cantidad de variables independientes para una oferta, el RECORD agrupa sus datos. En el caso del VARRAY, los resultados quedan almacenados como una colección con un límite definido y luego pueden recorrerse con un LOOP.
+En este proyecto también aportan a la eficiencia del procesamiento, pero cada uno de una forma distinta. Con RECORD podemos manejar todos los datos de una oferta mediante una sola variable estructurada, en vez de crear y controlar muchas variables independientes. Esto hace que el bloque sea más claro y reduce la posibilidad de confundir datos que pertenecen a ofertas diferentes.
+
+Con VARRAY podemos guardar varios valores relacionados dentro de una colección con un límite conocido. En nuestro ejercicio, además, usamos `BULK COLLECT` para traer varias filas de la consulta en una sola operación y almacenarlas directamente en las colecciones. Después recorremos esos resultados con un LOOP. Para EDUBIO360 esto resulta útil cuando queremos trabajar con un grupo pequeño y controlado de alternativas, como las cinco ofertas utilizadas en el ejemplo.
 
 Los bloques fueron ejecutados y verificados en Oracle SQL Developer. Las evidencias obtenidas se almacenan en `docs/evidencias/ejecucion-oracle/` junto con el resto del proyecto.
 
@@ -422,6 +424,8 @@ CURSOR c_areas IS
 ```
 
 Este cursor no recibe ningún parámetro. Siempre ejecuta la misma consulta y obtiene las áreas de conocimiento existentes en la tabla `AREA_CONOCIMIENTO`.
+
+En nuestro ejercicio consideramos este caso como el cursor más simple, porque la consulta no cambia según un valor externo. En cambio, `c_ofertas_por_area` es un cursor más complejo porque recibe `p_id_area`, utiliza ese valor dentro del `WHERE` y se vuelve a ejecutar con un área distinta durante el recorrido. De esta manera, una sola definición de cursor nos sirve para Salud, Tecnología, Educación y las demás áreas, sin tener que escribir una consulta diferente para cada una.
 
 Después se recorre con:
 
@@ -770,7 +774,7 @@ PKG_ACADEMICO
 
 Esto ayudaría a mantener organizadas las funciones y procedimientos del mismo dominio en vez de tenerlos todos separados.
 
-También podría facilitar el mantenimiento porque las operaciones académicas quedarían agrupadas bajo un mismo módulo.
+También podría facilitar el mantenimiento porque las operaciones académicas quedarían agrupadas bajo un mismo módulo. Además, el package ayuda a manejar dependencias de una forma más ordenada. Por ejemplo, si `pr_generar_reporte_ofertas` utiliza `fn_clasificar_arancel`, ambas operaciones pueden mantenerse dentro de `pkg_academico` y queda más claro que pertenecen al mismo conjunto de lógica. Si cambia una tabla o una columna de la que dependen estos objetos, tendremos que revisar esas dependencias y, si corresponde, recompilar los objetos afectados.
 
 Como posible dificultad, un Package demasiado grande puede terminar mezclando responsabilidades diferentes. Por eso sería necesario separar los objetos según su función y evitar agrupar todo solo por comodidad.
 
@@ -826,13 +830,11 @@ La idea sería repartir las responsabilidades. Un procedimiento podría ejecutar
 
 ## 7.6 Reutilización y mantenimiento
 
-El principal aporte de Procedures y Functions sería evitar repetir la misma lógica en varios lugares.
+El principal aporte de Procedures y Functions sería evitar repetir la misma lógica en varios lugares. Si una consulta o regla se utiliza desde distintos procesos, resulta más fácil mantener una sola versión que tener varias copias.
 
-Si una consulta o regla se utiliza desde distintos procesos, resulta más fácil mantener una sola versión que tener varias copias.
+Por ejemplo, si varias partes de EDUBIO360 necesitan generar ofertas por área, conviene mantener esa lógica en un procedimiento como `pr_generar_reporte_ofertas` en vez de copiar la misma consulta en distintos procesos. Lo mismo ocurre con una función de clasificación de arancel: si cambia la regla, bastaría con modificarla en un solo lugar.
 
-Los Packages ayudarían a ordenar esos objetos según su propósito.
-
-Esto también puede facilitar los cambios futuros, porque una modificación puede realizarse en un punto central en vez de revisar varias partes del sistema.
+Los Packages ayudarían a ordenar estos objetos según su propósito y a dejar visibles sus relaciones. Esto facilita el mantenimiento, pero también obliga a revisar las dependencias. Si un procedimiento depende de una tabla y esa tabla cambia de estructura, el objeto puede quedar inválido o necesitar una recompilación. Por eso, antes de modificar tablas utilizadas por el package, sería necesario revisar qué procedimientos y funciones dependen de ellas.
 
 ## 7.7 Riesgos y limitaciones
 
@@ -840,11 +842,12 @@ Aunque estos objetos pueden ser útiles, no conviene utilizarlos sin una necesid
 
 Entre los aspectos que habría que revisar antes de implementarlos se encuentran:
 
-- **Rendimiento:** procedimientos, funciones o triggers con consultas pesadas pueden aumentar el tiempo de ejecución.
-- **Mantenimiento:** demasiada lógica dentro de Oracle puede hacer más difícil entender dónde se está procesando cada regla.
-- **Complejidad:** un Package demasiado grande o varios Triggers sobre las mismas tablas pueden volver más difícil seguir el flujo del sistema.
-- **Seguridad:** los permisos para ejecutar procedimientos o modificar objetos almacenados deben controlarse correctamente.
-- **Dependencias:** si una función o procedimiento depende de una tabla que cambia, puede ser necesario revisar y recompilar el objeto.
+- **Rendimiento:** un procedimiento o una función con consultas muy pesadas puede tardar más de lo esperado. Un trigger también agrega trabajo cada vez que ocurre el evento que lo activa, por lo que no conviene colocar lógica pesada dentro de él.
+- **Mantenimiento:** si demasiadas reglas quedan dentro de Oracle, puede ser difícil saber si una operación se está resolviendo en la base de datos o en el backend. Por eso cada objeto debería tener una responsabilidad clara.
+- **Complejidad:** un Package demasiado grande o varios Triggers sobre una misma tabla pueden hacer más difícil seguir el flujo de una operación.
+- **Seguridad:** no todos los usuarios deberían poder ejecutar o modificar estos objetos. Los permisos tendrían que entregarse solamente a los usuarios o procesos que realmente los necesiten.
+- **Dependencias:** Procedures, Functions y Packages pueden depender de tablas, columnas u otros objetos. Si uno de esos elementos cambia, hay que revisar los objetos dependientes y, si corresponde, recompilarlos.
+- **Integridad y auditoría:** los triggers pueden ayudar a registrar cambios o reforzar ciertas reglas, pero no deben reemplazar restricciones como claves primarias, claves foráneas, `CHECK` o `NOT NULL`. En EDUBIO360 los usaríamos como apoyo, por ejemplo para dejar un historial de modificaciones de arancel.
 
 Por estas razones, en EDUBIO360 se plantea implementar estos objetos solamente cuando exista una operación real que los justifique.
 
