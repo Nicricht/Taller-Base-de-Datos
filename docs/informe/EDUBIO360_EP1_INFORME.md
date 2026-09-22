@@ -157,13 +157,13 @@ La fuente original tiene 106.555 filas y 28 columnas en una estructura plana. En
 
 ### Primera Forma Normal (1FN)
 
-La Primera Forma Normal busca que cada columna tenga un valor único y que cada fila pueda identificarse.
+La Primera Forma Normal busca que cada campo contenga un valor atómico, es decir, un solo dato por posición, y que cada fila pueda identificarse mediante una clave.
 
 En el modelo de EDUBIO360 cada tabla tiene una clave primaria y no se guardan listas dentro de una sola columna. Por ejemplo, las vías de ingreso no se guardan juntas en un texto, sino que cada vía se almacena como un registro de `VIA_INGRESO` y luego se referencia desde `MATRICULA_HISTORICA`.
 
 ### Segunda Forma Normal (2FN)
 
-Durante el análisis apareció un problema con la carrera. En un modelo anterior se pensaba guardar en una misma tabla el nombre de la carrera, el nivel y el área de conocimiento.
+Una vez cumplida la 1FN, se revisaron las dependencias entre los datos para evitar que atributos distintos quedaran unidos de forma innecesaria. Durante este análisis apareció un problema con la carrera: en un modelo anterior se pensaba guardar en una misma tabla el nombre de la carrera, el nivel y el área de conocimiento.
 
 Sin embargo, al revisar los datos se comprobó que el nombre de la carrera determina el área de conocimiento, pero no siempre determina el nivel de carrera. Se encontraron nombres de carrera que aparecen asociados a más de un nivel.
 
