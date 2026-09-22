@@ -1325,18 +1325,6 @@ La tabla `STAGING_MATRICULA` se mantiene fuera del DER normalizado porque corres
 
 ## 9.3 Evidencias de ejecución
 
-Las evidencias corresponden a ejecuciones realizadas en Oracle SQL Developer y permiten respaldar el funcionamiento de los bloques PL/SQL y las validaciones de la base de datos.
+Los bloques PL/SQL desarrollados para EDUBIO360 fueron ejecutados y verificados en Oracle SQL Developer. Las evidencias permiten comprobar el funcionamiento de RECORD, VARRAY, cursores parametrizados, loops anidados y manejo de excepciones, además de la validación final de los registros almacenados en la base de datos.
 
-Las evidencias se encuentran en `docs/evidencias/ejecucion-oracle/` e incluyen:
-
-- `01_record.txt`: salida real del bloque RECORD, con carrera, nivel, institución, comuna, modalidad, jornada, matrícula y arancel;
-- `02_varray.png`: ejecución del VARRAY con cinco ofertas y aranceles positivos;
-- `03_cursores_loops.png`: ejecución de cursores y loops, mostrando un área y sus ofertas;
-- `03b_cursores_estilo_clase.txt`: ejecución real del cursor parametrizado con `OPEN`, `FETCH`, `%NOTFOUND`, `CLOSE` y de los cursores anidados;
-- `04_excepciones.txt`: salida real de `NO_DATA_FOUND`, `TOO_MANY_ROWS` y de la excepción `e_arancel_invalido`;
-- `04a_no_data_found.png`: captura de la ejecución real de `NO_DATA_FOUND`;
-- `04b_too_many_rows.png`: captura de la ejecución real de `TOO_MANY_ROWS`;
-- `04c_excepcion_usuario.png`: captura de la ejecución real de `e_arancel_invalido`;
-- `05_validacion_final.png`: validación de los conteos esperados de todas las tablas, incluyendo 106.555 registros en `STAGING_MATRICULA` y `MATRICULA_HISTORICA`.
-
-La validación final concluyó con el mensaje `VERIFICACION FINAL OK: EduBio 360 listo.`, confirmando que los conteos esperados coinciden con los datos cargados.
+Las capturas y salidas obtenidas durante las ejecuciones se mantienen junto con la documentación técnica del proyecto como respaldo de los resultados presentados.
