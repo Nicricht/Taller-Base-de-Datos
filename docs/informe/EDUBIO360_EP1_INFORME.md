@@ -555,7 +555,7 @@ El cursor parametrizado evita repetir una consulta distinta para cada área y pe
 
 Para operaciones masivas simples, una consulta SQL directa puede ser más eficiente que procesar cada fila con un cursor. En este proyecto el cursor se utiliza porque necesitamos un procesamiento controlado y anidado de los resultados, que es precisamente el caso trabajado en la evaluación.
 
-La evidencia de ejecución de este bloque se agregará después de ejecutarlo y verificarlo en Oracle.
+El bloque fue ejecutado y verificado en Oracle SQL Developer. La evidencia correspondiente se encuentra en `docs/evidencias/ejecucion-oracle/03_cursores_loops.png`.
 
 
 # 6. Control de excepciones
@@ -679,7 +679,7 @@ Las excepciones sirven como una capa adicional dentro de la lógica PL/SQL. Perm
 
 En EDUBIO360 se combinan las restricciones del modelo con el manejo de excepciones para evitar trabajar silenciosamente con datos incorrectos.
 
-La evidencia de ejecución de los dos casos se incorporará cuando el script sea ejecutado y revisado en Oracle.
+Los dos casos fueron ejecutados y verificados en Oracle SQL Developer. La salida correspondiente se encuentra documentada en `docs/evidencias/ejecucion-oracle/04_excepciones.txt`.
 
 
 # 7. Evaluación de procedimientos, funciones, packages y triggers
