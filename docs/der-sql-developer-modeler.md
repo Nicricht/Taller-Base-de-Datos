@@ -40,6 +40,55 @@ El DER debe mostrar las 19 tablas de negocio:
 
 `STAGING_MATRICULA` no debe formar parte del DER principal porque corresponde a una tabla temporal de carga y no al modelo normalizado de negocio.
 
+## Convención correcta de relaciones en el modelo relacional
+
+Para reproducir el aspecto de `Relational_1` de Oracle SQL Developer Data Modeler no se deben inventar símbolos de cardinalidad sobre las líneas. En el modelo relacional, cada enlace representa una clave foránea real entre una tabla hija y una tabla padre.
+
+La dirección de la punta de flecha es una preferencia visual configurable en Data Modeler. Para que coincida con los ejemplos utilizados como referencia, se debe configurar:
+
+`Tools > Preferences > Data Modeler > Diagram > Relational Model > Foreign Key Arrow Direction > Primary Key`
+
+Con esta configuración la flecha apunta hacia la tabla padre, es decir, desde la FK de la tabla hija hacia la PK o UK referenciada. La flecha por sí sola no significa 1:1 ni 1:N.
+
+Los marcadores de columna se interpretan así:
+
+- `P`: columna perteneciente a la clave primaria.
+- `F`: columna perteneciente a una clave foránea.
+- `U`: columna perteneciente a una restricción unique.
+- `PF`: columna que participa simultáneamente en PK y FK.
+- `*`: columna obligatoria, equivalente a NOT NULL.
+
+En los diagramas relacionales, las FKs obligatorias se muestran con línea continua y las FKs opcionales con línea discontinua. En EDUBIO360 las FKs del modelo de negocio son NOT NULL, por lo que deben aparecer como relaciones obligatorias desde el lado hijo.
+
+Los pequeños símbolos adicionales de la línea tampoco deben interpretarse como cardinalidad. Oracle utiliza marcas en la relación para representar propiedades de la FK, por ejemplo la regla de borrado. `NO ACTION` o `RESTRICT` se representan mediante una línea transversal, `CASCADE` mediante una X y `SET NULL` mediante un pequeño círculo.
+
+## Cardinalidad real de EDUBIO360
+
+Aunque la punta de flecha del modelo relacional no expresa por sí sola la cardinalidad, las restricciones reales del esquema permiten determinarla. Todas las FKs principales de EDUBIO360 son no únicas y NOT NULL. Por lo tanto, cada fila hija debe referenciar exactamente un padre, mientras que un padre puede estar relacionado con cero, una o muchas filas hijas.
+
+Las relaciones del modelo son:
+
+- REGION 1:N PROVINCIA, mediante `PROVINCIA.id_region`.
+- PROVINCIA 1:N COMUNA, mediante `COMUNA.id_provincia`.
+- TIPO_INSTITUCION 1:N INSTITUCION, mediante `INSTITUCION.id_tipo_institucion`.
+- INSTITUCION 1:N ACREDITACION_INSTITUCION, mediante `ACREDITACION_INSTITUCION.id_institucion`.
+- AREA_CONOCIMIENTO 1:N DENOMINACION_CARRERA, mediante `DENOMINACION_CARRERA.id_area`.
+- NIVEL_ESTUDIO 1:N NIVEL_CARRERA, mediante `NIVEL_CARRERA.id_nivel_estudio`.
+- DENOMINACION_CARRERA 1:N CARRERA, mediante `CARRERA.id_denominacion`.
+- NIVEL_CARRERA 1:N CARRERA, mediante `CARRERA.id_nivel_carrera`.
+- INSTITUCION 1:N OFERTA_ACADEMICA, mediante `OFERTA_ACADEMICA.id_institucion`.
+- CARRERA 1:N OFERTA_ACADEMICA, mediante `OFERTA_ACADEMICA.id_carrera`.
+- COMUNA 1:N OFERTA_ACADEMICA, mediante `OFERTA_ACADEMICA.id_comuna`.
+- MODALIDAD 1:N OFERTA_ACADEMICA, mediante `OFERTA_ACADEMICA.id_modalidad`.
+- JORNADA 1:N OFERTA_ACADEMICA, mediante `OFERTA_ACADEMICA.id_jornada`.
+- OFERTA_ACADEMICA 1:N PLAN_OFERTA, mediante `PLAN_OFERTA.id_oferta`.
+- TIPO_PLAN 1:N PLAN_OFERTA, mediante `PLAN_OFERTA.id_tipo_plan`.
+- PLAN_OFERTA 1:N MATRICULA_HISTORICA, mediante `MATRICULA_HISTORICA.id_plan_oferta`.
+- REQUISITO_INGRESO 1:N MATRICULA_HISTORICA, mediante `MATRICULA_HISTORICA.id_requisito_ingreso`.
+- VIA_INGRESO 1:N MATRICULA_HISTORICA, mediante `MATRICULA_HISTORICA.id_via_ingreso`.
+
+No existe ninguna relación 1:1 en las restricciones actuales del esquema.
+
 ## Relaciones que deben verse
 
 - REGION 1:N PROVINCIA
@@ -68,57 +117,44 @@ Para evitar cruces innecesarios, `OFERTA_ACADEMICA` debe quedar en la zona centr
 ### Bloque territorial, lado izquierdo
 
 ```text
-REGION
-  ↓
-PROVINCIA
-  ↓
-COMUNA
-  ↓
-OFERTA_ACADEMICA
+PROVINCIA.id_region → REGION.id_region
+COMUNA.id_provincia → PROVINCIA.id_provincia
+OFERTA_ACADEMICA.id_comuna → COMUNA.id_comuna
 ```
 
 ### Bloque institucional, parte superior izquierda
 
 ```text
-TIPO_INSTITUCION
-        ↓
-INSTITUCION ───────→ OFERTA_ACADEMICA
-        ↓
-ACREDITACION_INSTITUCION
+INSTITUCION.id_tipo_institucion → TIPO_INSTITUCION.id_tipo_institucion
+OFERTA_ACADEMICA.id_institucion → INSTITUCION.id_institucion
+ACREDITACION_INSTITUCION.id_institucion → INSTITUCION.id_institucion
 ```
 
 ### Bloque académico, parte superior y centro
 
 ```text
-AREA_CONOCIMIENTO
-        ↓
-DENOMINACION_CARRERA
-        ↓
-      CARRERA ──────→ OFERTA_ACADEMICA
-        ↑
-NIVEL_CARRERA
-        ↑
-NIVEL_ESTUDIO
+DENOMINACION_CARRERA.id_area → AREA_CONOCIMIENTO.id_area
+CARRERA.id_denominacion → DENOMINACION_CARRERA.id_denominacion
+CARRERA.id_nivel_carrera → NIVEL_CARRERA.id_nivel_carrera
+NIVEL_CARRERA.id_nivel_estudio → NIVEL_ESTUDIO.id_nivel_estudio
+OFERTA_ACADEMICA.id_carrera → CARRERA.id_carrera
 ```
 
 ### Catálogos de la oferta, lado derecho
 
 ```text
-MODALIDAD ──────→
-                  OFERTA_ACADEMICA
-JORNADA ────────→
+OFERTA_ACADEMICA.id_modalidad → MODALIDAD.id_modalidad
+OFERTA_ACADEMICA.id_jornada → JORNADA.id_jornada
 ```
 
 ### Planes y matrícula histórica, parte inferior
 
 ```text
-TIPO_PLAN ─────→ PLAN_OFERTA
-                     ↑
-              OFERTA_ACADEMICA
-                     ↓
-              MATRICULA_HISTORICA
-                 ↑             ↑
-REQUISITO_INGRESO               VIA_INGRESO
+PLAN_OFERTA.id_tipo_plan → TIPO_PLAN.id_tipo_plan
+PLAN_OFERTA.id_oferta → OFERTA_ACADEMICA.id_oferta
+MATRICULA_HISTORICA.id_plan_oferta → PLAN_OFERTA.id_plan_oferta
+MATRICULA_HISTORICA.id_requisito_ingreso → REQUISITO_INGRESO.id_requisito_ingreso
+MATRICULA_HISTORICA.id_via_ingreso → VIA_INGRESO.id_via_ingreso
 ```
 
 ## Orden visual sugerido
