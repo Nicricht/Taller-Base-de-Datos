@@ -1,0 +1,15 @@
+EDUBIO360 - Evidencia de ejecución Oracle
+Archivo relacionado: plsql/01_record.sql
+
+Resultado real obtenido en Oracle SQL Developer:
+
+Carrera: INGENIERIA DE EJECUCION EN ELECTRICIDAD-PE
+Nivel: Carreras Profesionales
+Institucion: IP DR. VIRGINIO GOMEZ G.
+Comuna: Concepcion
+Modalidad: Presencial
+Jornada: Vespertino
+Matricula: $154000
+Arancel: $1896000
+
+Procedimiento PL/SQL terminado correctamente.
