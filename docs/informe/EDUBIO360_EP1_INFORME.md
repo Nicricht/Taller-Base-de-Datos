@@ -914,7 +914,36 @@ Finalmente, cualquier cambio futuro en el modelo debería mantener el mismo crit
 
 # 9. Anexos
 
-## 9.1 Código completo utilizado en los bloques PL/SQL
+## 9.1 Conteos finales validados
+
+La validación final de la base de datos confirmó los siguientes conteos:
+
+| Tabla | Filas validadas |
+|---|---:|
+| STAGING_MATRICULA | 106.555 |
+| REGION | 1 |
+| PROVINCIA | 3 |
+| COMUNA | 9 |
+| TIPO_INSTITUCION | 5 |
+| INSTITUCION | 30 |
+| ACREDITACION_INSTITUCION | 30 |
+| AREA_CONOCIMIENTO | 10 |
+| DENOMINACION_CARRERA | 824 |
+| NIVEL_ESTUDIO | 3 |
+| NIVEL_CARRERA | 5 |
+| MODALIDAD | 3 |
+| JORNADA | 5 |
+| CARRERA | 830 |
+| OFERTA_ACADEMICA | 1.544 |
+| TIPO_PLAN | 3 |
+| PLAN_OFERTA | 1.634 |
+| REQUISITO_INGRESO | 5 |
+| VIA_INGRESO | 11 |
+| MATRICULA_HISTORICA | 106.555 |
+
+Los conteos fueron verificados en Oracle SQL Developer y coincidieron con los valores esperados para todas las tablas.
+
+## 9.2 Código completo utilizado en los bloques PL/SQL
 
 Los siguientes scripts corresponden al código PL/SQL utilizado en EDUBIO360. Cada archivo también se encuentra disponible de forma independiente dentro de la carpeta `plsql/` del repositorio.
 
@@ -1311,7 +1340,7 @@ END;
 /
 ```
 
-## 9.2 Diagramas y modelos
+## 9.3 Diagramas y modelos
 
 El modelo de datos utilizado en el proyecto se encuentra documentado en los siguientes archivos del repositorio:
 
@@ -1323,7 +1352,7 @@ El modelo de datos utilizado en el proyecto se encuentra documentado en los sigu
 
 La tabla `STAGING_MATRICULA` se mantiene fuera del DER normalizado porque corresponde a una tabla técnica de recepción y transformación de los datos originales.
 
-## 9.3 Evidencias de ejecución
+## 9.4 Evidencias de ejecución
 
 Los bloques PL/SQL desarrollados para EDUBIO360 fueron ejecutados y verificados en Oracle SQL Developer. Las evidencias permiten comprobar el funcionamiento de RECORD, VARRAY, cursores parametrizados, loops anidados y manejo de excepciones, además de la validación final de los registros almacenados en la base de datos.
 
