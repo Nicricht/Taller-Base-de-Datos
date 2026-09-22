@@ -23,7 +23,7 @@ La idea principal es que la información no dependa siempre del archivo original
 
 En esta evaluación el trabajo se concentra solamente en la parte de base de datos de EDUBIO360. La interfaz completa del sistema no forma parte de este informe. El objetivo es dejar organizada la información y demostrar cómo puede procesarse desde Oracle.
 
-El alcance incluye el modelo de datos en Oracle, la normalización, las claves primarias y foráneas, la carga de los datos y los bloques PL/SQL. Primero recibimos la información original en una tabla de staging, que funciona como una zona temporal. Desde ahí revisamos y transformamos los datos antes de llevarlos a las tablas finales.
+El alcance incluye el modelo de datos en Oracle, la normalización, las claves primarias y foráneas, la carga de los datos y los bloques PL/SQL. Primero la información original se recibe en una tabla de staging, que funciona como una zona temporal. Desde ahí los datos se revisan y se transforman antes de llevarlos a las tablas finales.
 
 La base de datos funciona como la capa donde se almacena la información académica. Más adelante, otros componentes del proyecto pueden consultar estos datos mediante servicios o una API, pero el frontend no accede directamente a Oracle.
 
@@ -562,7 +562,7 @@ El bloque fue ejecutado y verificado en Oracle SQL Developer. La evidencia corre
 
 # 6. Control de excepciones
 
-Para esta parte se utiliza el archivo `plsql/04_excepciones.sql`. En el script se trabajan dos casos: una excepción predefinida por Oracle y una excepción creada por nosotros para una regla del proyecto.
+Para esta parte se utiliza el archivo `plsql/04_excepciones.sql`. En el script se trabajan dos casos: una excepción predefinida por Oracle y una excepción creada dentro del bloque para representar una regla del proyecto.
 
 ## 6.1 Excepción predefinida por Oracle
 
@@ -656,7 +656,7 @@ NO_DATA_FOUND
 → Oracle detecta que una consulta no devolvió filas.
 
 e_arancel_invalido
-→ Nosotros definimos que un arancel negativo no debe continuar como un valor válido.
+→ En EDUBIO360 se define que un arancel negativo no debe continuar como un valor válido.
 ```
 
 Por lo tanto, las excepciones predefinidas se utilizan cuando Oracle ya reconoce el tipo de error. Las excepciones personalizadas se utilizan cuando se necesita controlar una situación propia de la lógica del proyecto.
@@ -774,7 +774,7 @@ PKG_ACADEMICO
 
 Esto ayudaría a mantener organizadas las funciones y procedimientos del mismo dominio en vez de tenerlos todos separados.
 
-También podría facilitar el mantenimiento porque las operaciones académicas quedarían agrupadas bajo un mismo módulo. Además, el package ayuda a manejar dependencias de una forma más ordenada. Por ejemplo, si `pr_generar_reporte_ofertas` utiliza `fn_clasificar_arancel`, ambas operaciones pueden mantenerse dentro de `pkg_academico` y queda más claro que pertenecen al mismo conjunto de lógica. Si cambia una tabla o una columna de la que dependen estos objetos, tendremos que revisar esas dependencias y, si corresponde, recompilar los objetos afectados.
+También podría facilitar el mantenimiento porque las operaciones académicas quedarían agrupadas bajo un mismo módulo. Además, el package ayuda a manejar dependencias de una forma más ordenada. Por ejemplo, si `pr_generar_reporte_ofertas` utiliza `fn_clasificar_arancel`, ambas operaciones pueden mantenerse dentro de `pkg_academico` y queda más claro que pertenecen al mismo conjunto de lógica. Si cambia una tabla o una columna de la que dependen estos objetos, será necesario revisar esas dependencias y, si corresponde, recompilar los objetos afectados.
 
 Como posible dificultad, un Package demasiado grande puede terminar mezclando responsabilidades diferentes. Por eso sería necesario separar los objetos según su función y evitar agrupar todo solo por comodidad.
 
@@ -847,7 +847,7 @@ Entre los aspectos que habría que revisar antes de implementarlos se encuentran
 - **Complejidad:** un Package demasiado grande o varios Triggers sobre una misma tabla pueden hacer más difícil seguir el flujo de una operación.
 - **Seguridad:** no todos los usuarios deberían poder ejecutar o modificar estos objetos. Los permisos tendrían que entregarse solamente a los usuarios o procesos que realmente los necesiten.
 - **Dependencias:** Procedures, Functions y Packages pueden depender de tablas, columnas u otros objetos. Si uno de esos elementos cambia, hay que revisar los objetos dependientes y, si corresponde, recompilarlos.
-- **Integridad y auditoría:** los triggers pueden ayudar a registrar cambios o reforzar ciertas reglas, pero no deben reemplazar restricciones como claves primarias, claves foráneas, `CHECK` o `NOT NULL`. En EDUBIO360 los usaríamos como apoyo, por ejemplo para dejar un historial de modificaciones de arancel.
+- **Integridad y auditoría:** los triggers pueden ayudar a registrar cambios o reforzar ciertas reglas, pero no deben reemplazar restricciones como claves primarias, claves foráneas, `CHECK` o `NOT NULL`. En EDUBIO360 se utilizarían como apoyo, por ejemplo para dejar un historial de modificaciones de arancel.
 
 Por estas razones, en EDUBIO360 se plantea implementar estos objetos solamente cuando exista una operación real que los justifique.
 
