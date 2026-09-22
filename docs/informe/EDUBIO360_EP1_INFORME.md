@@ -1137,6 +1137,7 @@ Las evidencias se encuentran en `docs/evidencias/ejecucion-oracle/` e incluyen:
 - `01_record.txt`: salida real del bloque RECORD, con carrera, nivel, institución, comuna, modalidad, jornada, matrícula y arancel;
 - `02_varray.png`: ejecución del VARRAY con cinco ofertas y aranceles positivos;
 - `03_cursores_loops.png`: ejecución de cursores y loops, mostrando un área y sus ofertas;
+- `03b_cursores_estilo_clase.txt`: ejecución real del cursor parametrizado con `OPEN`, `FETCH`, `%NOTFOUND`, `CLOSE` y de los cursores anidados;
 - `04_excepciones.txt`: salida real de `NO_DATA_FOUND` y de la excepción `e_arancel_invalido`;
 - `05_validacion_final.png`: validación de los conteos esperados de todas las tablas, incluyendo 106.555 registros en `STAGING_MATRICULA` y `MATRICULA_HISTORICA`.
 
