@@ -13,17 +13,17 @@
 
 ## 1.1 Descripción del proyecto
 
-EDUBIO360 es un proyecto que busca organizar información de educación superior para que después pueda ser consultada de una forma más clara dentro del sistema. La información utilizada proviene de un archivo de matrículas de educación superior de la Región del Biobío, el cual contiene datos de instituciones, carreras, modalidades, jornadas, comunas, valores de matrícula, aranceles y otros datos relacionados.
+EDUBIO360 es un proyecto que busca ordenar información de educación superior para que una persona pueda revisar y comparar alternativas de estudio de una forma más clara. Para trabajar el proyecto usamos un archivo de matrículas de educación superior de la Región del Biobío. Ese archivo contiene información de instituciones, carreras, comunas, modalidades, jornadas, valores de matrícula, aranceles y otros datos relacionados con cada oferta académica.
 
-El archivo original contiene 106.555 registros y 28 columnas. Como la información viene en una estructura plana, varios datos se repiten muchas veces. Por esta razón, para la asignatura de Taller de Base de Datos se trabajó en organizar esos datos en una base de datos relacional Oracle.
+El archivo original contiene 106.555 registros y 28 columnas. El problema es que todos esos datos vienen juntos en una estructura plana. Esto significa que en una misma tabla se repiten muchas veces nombres de instituciones, carreras, comunas y otros valores. Por eso, en Taller de Base de Datos tomamos esa información y la separamos en tablas relacionadas dentro de Oracle.
 
-La idea principal es que la base de datos permita almacenar la información de manera ordenada y que después pueda ser utilizada por EDUBIO360 para realizar consultas sobre carreras, instituciones y ofertas académicas. También se utilizará PL/SQL para procesar información y resolver necesidades relacionadas con los datos, utilizando elementos vistos en clases como RECORD, VARRAY, cursores, loops y manejo de excepciones.
+La idea principal es que la información no dependa siempre del archivo original. Una vez organizada en Oracle podemos consultar, por ejemplo, qué institución imparte una carrera, dónde se ofrece y cuánto cuesta. También usamos PL/SQL para realizar procesos sobre esos datos. En esta evaluación trabajamos con RECORD, VARRAY, cursores, loops y excepciones, tratando de relacionar cada ejercicio con una necesidad real de EDUBIO360.
 
 ## 1.2 Alcance
 
-En esta evaluación el trabajo se concentra solamente en la parte de base de datos de EDUBIO360. Esto significa que no se desarrolla el frontend ni la interfaz completa del sistema dentro de este informe.
+En esta evaluación nos enfocamos solamente en la parte de base de datos de EDUBIO360. No estamos desarrollando aquí la interfaz completa del sistema. El objetivo es dejar organizada la información y demostrar cómo podemos procesarla desde Oracle.
 
-El alcance considera la creación y organización del modelo de datos en Oracle, la normalización de las tablas, las relaciones mediante claves primarias y foráneas, la carga de los datos provenientes del archivo original y el uso de PL/SQL para procesar información.
+El alcance incluye el modelo de datos en Oracle, la normalización, las claves primarias y foráneas, la carga de los datos y los bloques PL/SQL. Primero recibimos la información original en una tabla de staging, que funciona como una zona temporal. Desde ahí revisamos y transformamos los datos antes de llevarlos a las tablas finales.
 
 La base de datos funciona como la capa donde se almacena la información académica. Más adelante, otros componentes del proyecto pueden consultar estos datos mediante servicios o una API, pero el frontend no accede directamente a Oracle.
 
@@ -257,7 +257,7 @@ Los scripts utilizados para esta sección son:
 
 ## 4.1 RECORD
 
-Un RECORD permite reunir varios datos relacionados dentro de una sola variable. En EDUBIO360 se utilizó para representar una oferta académica completa.
+Un RECORD permite guardar varios datos diferentes dentro de una sola variable. En nuestro caso lo usamos para representar una oferta académica completa. En vez de trabajar con una variable para la carrera, otra para la institución, otra para la comuna y así sucesivamente, agrupamos todos esos datos dentro de `v_oferta`. Así queda más claro que todos pertenecen a la misma oferta.
 
 El tipo creado en el bloque PL/SQL es:
 
@@ -331,11 +331,11 @@ Finalmente, los datos se muestran utilizando `DBMS_OUTPUT.PUT_LINE`.
 
 En EDUBIO360 esto es útil porque una oferta no se entiende solamente por el nombre de la carrera. Para mostrar una alternativa académica también necesitamos saber qué institución la ofrece, dónde se encuentra, la modalidad, jornada y sus valores. El RECORD permite tratar esos datos relacionados como una sola estructura en vez de trabajar con muchas variables separadas.
 
-También se utilizó `%TYPE` para que los campos del RECORD tomen el mismo tipo de dato que las columnas reales de las tablas. De esta forma, el bloque queda relacionado directamente con la estructura de la base.
+También usamos `%TYPE`. Con esto no escribimos manualmente el tipo de dato de cada campo, sino que le indicamos a Oracle que use el mismo tipo que tiene la columna original. Por ejemplo, `nombre_carrera` toma el tipo de `DENOMINACION_CARRERA.nombre`. Esto ayuda a mantener el bloque relacionado con la estructura real de la base.
 
 ## 4.2 VARRAY
 
-El segundo tipo compuesto utilizado fue VARRAY. En este caso se necesitaba trabajar con un grupo pequeño y limitado de resultados.
+El segundo tipo compuesto es VARRAY. Un VARRAY funciona como una lista que tiene un límite máximo definido. Para este ejercicio decidimos trabajar con cinco ofertas, porque queríamos guardar un grupo pequeño de alternativas y después recorrerlas.
 
 El script declara dos arreglos con capacidad máxima de cinco elementos:
 
@@ -351,7 +351,7 @@ v_nombres t_nombres;
 v_aranceles t_aranceles;
 ```
 
-La consulta obtiene cinco ofertas junto con sus aranceles. Los resultados se cargan utilizando `BULK COLLECT`:
+La consulta obtiene cinco ofertas junto con sus aranceles. Usamos `BULK COLLECT` para cargar varias filas de la consulta de una sola vez dentro de los VARRAY. Después recorremos esas posiciones con un LOOP para mostrar cada alternativa:
 
 ```sql
 SELECT nombre_oferta, valor_arancel
@@ -391,9 +391,9 @@ Esto se puede relacionar con una necesidad de EDUBIO360, ya que el sistema puede
 
 Los dos tipos compuestos resuelven necesidades distintas.
 
-El RECORD se utiliza cuando necesitamos representar en una sola estructura diferentes datos que pertenecen a una misma oferta académica.
+En palabras simples, usamos RECORD cuando queremos reunir varios datos distintos de una sola oferta académica.
 
-El VARRAY se utiliza cuando necesitamos mantener un grupo limitado de valores y recorrerlos dentro del bloque PL/SQL.
+Usamos VARRAY cuando queremos guardar una lista de tamaño limitado, en este caso cinco alternativas, para después recorrerla dentro del bloque PL/SQL.
 
 En este proyecto ayudan a que el procesamiento quede más ordenado. En vez de declarar una gran cantidad de variables independientes para una oferta, el RECORD agrupa sus datos. En el caso del VARRAY, los resultados quedan almacenados como una colección con un límite definido y luego pueden recorrerse con un LOOP.
 
@@ -406,7 +406,7 @@ Para esta parte se utiliza el archivo `plsql/03_cursor_loops.sql`. En el script 
 
 ## 5.1 Qué es un cursor explícito
 
-Un cursor explícito permite recorrer el resultado de una consulta que puede devolver varias filas. A diferencia de un `SELECT INTO`, que normalmente se utiliza cuando esperamos obtener una sola fila, el cursor permite procesar los registros uno por uno.
+Un cursor explícito sirve cuando una consulta devuelve varias filas y queremos trabajarlas una por una. La diferencia con `SELECT INTO` es que `SELECT INTO` se usa normalmente cuando esperamos una sola fila. Con un cursor podemos recorrer cada resultado y ejecutar una acción para cada uno.
 
 En EDUBIO360 esto es útil porque muchas consultas no entregan un solo resultado. Por ejemplo, un área de conocimiento puede tener varias carreras y cada carrera puede tener distintas ofertas académicas.
 
@@ -437,7 +437,7 @@ Este ejemplo sirve para demostrar el funcionamiento básico de un cursor explíc
 
 ## 5.3 Cursor explícito con parámetro
 
-El segundo cursor es más completo porque recibe un parámetro:
+El segundo cursor recibe un parámetro. Ese parámetro es el identificador del área que queremos consultar. Gracias a eso podemos reutilizar el mismo cursor para Salud, Tecnología, Educación u otra área, sin escribir una consulta distinta para cada caso:
 
 ```sql
 CURSOR c_ofertas_por_area (
@@ -659,7 +659,7 @@ Por lo tanto, las excepciones predefinidas se utilizan cuando Oracle ya reconoce
 
 ## 6.4 Integración en EDUBIO360
 
-El manejo de excepciones permite que los bloques PL/SQL respondan de manera controlada cuando ocurre una situación inesperada.
+Una excepción nos permite controlar lo que ocurre cuando un bloque encuentra un problema. En vez de dejar que el programa termine solamente con un mensaje técnico de Oracle, podemos detectar la situación y responder de una forma más clara.
 
 Por ejemplo, si se intenta consultar una oferta que ya no existe, se puede controlar `NO_DATA_FOUND` y entregar un mensaje claro.
 
@@ -682,7 +682,7 @@ Los dos casos fueron ejecutados y verificados en Oracle SQL Developer. La salida
 
 # 7. Evaluación de procedimientos, funciones, packages y triggers
 
-En esta evaluación no se implementaron estos objetos como parte obligatoria del código actual. La pauta pide evaluar cómo podrían utilizarse dentro del proyecto y proponer una estrategia clara de uso futuro.
+En esta evaluación la pauta pide analizar cómo podríamos usar procedimientos, funciones, packages y triggers. No los implementamos solamente para decir que existen. Primero revisamos qué problema podría resolver cada uno dentro de EDUBIO360 y cuándo tendría sentido incorporarlo.
 
 En EDUBIO360 se decidió no crear objetos almacenados solo para aumentar la cantidad de elementos de la base. La idea es utilizarlos cuando exista una necesidad real de reutilización, cálculo, organización o auditoría.
 
@@ -822,13 +822,7 @@ Trigger
 Auditoría
 ```
 
-El Package serviría para agrupar la lógica académica.
-
-Los Procedures ejecutarían tareas completas, como generar información o procesar una operación.
-
-Las Functions devolverían valores específicos que puedan reutilizarse, por ejemplo una clasificación.
-
-Los Triggers quedarían para tareas automáticas asociadas directamente a eventos de la base, como una auditoría.
+La idea sería repartir las responsabilidades. Un procedimiento podría ejecutar una tarea completa, como generar un reporte de ofertas. Una función recibiría datos y devolvería un resultado, por ejemplo una clasificación de arancel. El package serviría para mantener agrupados los procedimientos y funciones relacionados con la información académica. El trigger quedaría para acciones que deban ejecutarse automáticamente, como registrar un cambio de arancel en una tabla de auditoría.
 
 ## 7.6 Reutilización y mantenimiento
 
@@ -859,7 +853,7 @@ En esta etapa se deja definida la estrategia de uso futuro, mientras que el cód
 
 # 8. Conclusión
 
-En esta evaluación se trabajó la parte de base de datos de EDUBIO360 a partir de una fuente real con 106.555 registros y 28 columnas. El principal trabajo fue transformar esa información plana en un modelo relacional Oracle más ordenado, separando los datos en tablas según su función y aplicando normalización hasta Tercera Forma Normal.
+En esta evaluación partimos desde un archivo real de 106.555 registros y 28 columnas. El trabajo principal fue tomar esa información, que originalmente estaba toda junta, y organizarla en una base de datos Oracle con tablas relacionadas. La normalización nos ayudó a separar información repetida y dejar cada dato en un lugar más claro dentro del modelo.
 
 También se utilizaron distintos elementos de PL/SQL relacionados directamente con las necesidades del proyecto. RECORD permitió reunir en una sola estructura los datos principales de una oferta académica. VARRAY permitió manejar un grupo limitado de resultados. Los cursores permitieron recorrer varias filas y, mediante loops anidados, organizar las ofertas según su área de conocimiento. Finalmente, el manejo de excepciones permitió controlar situaciones como búsquedas sin resultados y valores inválidos definidos por la lógica del proyecto.
 
@@ -867,7 +861,7 @@ Otro punto importante fue evaluar cómo se podrían incorporar en el futuro proc
 
 ## 8.1 Impacto del proyecto
 
-El trabajo realizado mejora la forma en que EDUBIO360 puede almacenar y procesar información académica. Al tener los datos separados y relacionados mediante claves primarias y foráneas, se reduce la repetición innecesaria y se facilita realizar consultas sobre carreras, instituciones, comunas, modalidades, jornadas y costos.
+El principal aporte es que EDUBIO360 ya no necesita trabajar directamente sobre una planilla plana para consultar la información. Al tener tablas relacionadas mediante claves, podemos buscar carreras, instituciones, comunas, modalidades, jornadas y costos de una forma más ordenada y con menos repetición de datos.
 
 El uso de PL/SQL también permite incorporar lógica dentro de la base de datos cuando sea necesario. Esto puede servir para generar información más estructurada, controlar errores durante el procesamiento y reutilizar operaciones en futuras etapas del proyecto.
 
