@@ -1094,7 +1094,7 @@ END;
 /
 ```
 
-### Anexo C.1 - Cursor parametrizado y cursores anidados con estructura de clases
+### Anexo C.1 - Cursor parametrizado, recorrido manual y cursores anidados
 
 Archivo: `plsql/03b_cursores_estilo_clase.sql`
 
