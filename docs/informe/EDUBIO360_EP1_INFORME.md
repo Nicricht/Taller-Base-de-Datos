@@ -562,7 +562,7 @@ El bloque fue ejecutado y verificado en Oracle SQL Developer. La evidencia corre
 
 # 6. Control de excepciones
 
-Para esta parte se utiliza el archivo `plsql/04_excepciones.sql`. En el script se trabajan tres casos: dos excepciones predefinidas por Oracle (`NO_DATA_FOUND` y `TOO_MANY_ROWS`) y una excepción definida dentro del bloque para representar una regla propia del proyecto.
+El control de excepciones de EDUBIO360 se encuentra en `plsql/04_excepciones.sql`. El script contempla dos excepciones predefinidas por Oracle (`NO_DATA_FOUND` y `TOO_MANY_ROWS`) y una excepción definida por el usuario para representar una regla propia del proyecto.
 
 ## 6.1 Excepciones predefinidas por Oracle
 
@@ -570,7 +570,7 @@ Para esta parte se utiliza el archivo `plsql/04_excepciones.sql`. En el script s
 
 Oracle tiene excepciones que ya vienen definidas y que se producen cuando ocurre una situación conocida durante la ejecución de un bloque PL/SQL.
 
-En el primer ejemplo se utiliza:
+Para controlar una consulta sin resultados se utiliza:
 
 ```sql
 NO_DATA_FOUND
@@ -615,7 +615,7 @@ En EDUBIO360 este tipo de excepción puede ser útil cuando se intenta consultar
 
 La segunda excepción predefinida utilizada es `TOO_MANY_ROWS`. Esta excepción se produce cuando una instrucción `SELECT INTO` espera obtener una sola fila, pero la consulta devuelve más de una.
 
-En el ejercicio se utiliza el área con identificador 1:
+Para representar una consulta que devuelve más filas de las esperadas se utiliza el área con identificador 1:
 
 ```sql
 v_id_area AREA_CONOCIMIENTO.id_area%TYPE := 1;
@@ -645,13 +645,13 @@ Este caso permite mostrar una situación distinta a `NO_DATA_FOUND`: en una se o
 
 ## 6.2 Excepción definida por el usuario
 
-El segundo ejemplo utiliza una excepción creada dentro del mismo bloque:
+Para controlar una condición propia del negocio se declara una excepción dentro del bloque:
 
 ```sql
 e_arancel_invalido EXCEPTION;
 ```
 
-Para probarla se utiliza un arancel negativo:
+La condición se representa mediante un arancel negativo:
 
 ```sql
 v_arancel NUMBER := -1;
@@ -704,7 +704,7 @@ Una excepción permite controlar lo que ocurre cuando un bloque encuentra un pro
 
 Por ejemplo, si se intenta consultar una oferta que ya no existe, se puede controlar `NO_DATA_FOUND` y entregar un mensaje claro. Si una consulta `SELECT INTO` devuelve varias filas cuando se esperaba solo una, se puede controlar `TOO_MANY_ROWS`.
 
-También se pueden definir excepciones propias para validar reglas antes de continuar con una operación. El ejemplo del arancel negativo muestra esta idea de forma simple.
+También se pueden definir excepciones propias para validar reglas antes de continuar con una operación. En EDUBIO360, el control de un arancel negativo representa una validación propia de la lógica del sistema.
 
 Esto ayuda a evitar que un bloque continúe trabajando con información inválida y permite identificar con mayor claridad qué problema ocurrió.
 
