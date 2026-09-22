@@ -31,22 +31,6 @@ El alcance incluye el modelo de datos en Oracle, la normalización, las claves p
 
 La base de datos funciona como la capa donde se almacena la información académica. Más adelante, otros componentes del proyecto pueden consultar estos datos mediante servicios o una API, pero el frontend no accede directamente a Oracle.
 
-El flujo general utilizado en esta parte del proyecto es:
-
-```text
-Archivo Excel / CSV
-        ↓
-STAGING_MATRICULA
-        ↓
-Validación de datos
-        ↓
-Proceso ETL
-        ↓
-Base de datos Oracle normalizada
-        ↓
-Consultas SQL y bloques PL/SQL
-```
-
 ## 1.3 Tecnologías utilizadas
 
 Para desarrollar esta parte de EDUBIO360 se utilizaron las siguientes tecnologías y herramientas:
