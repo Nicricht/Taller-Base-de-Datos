@@ -18,5 +18,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Validar cumplimiento estático de la pauta EP1
+      - name: Validar cumplimiento estático del informe EP1
         run: python qa/validate_ep1.py
+
+      - name: Validar presentación EP1 contra la pauta
+        run: python qa/validate_presentacion_ep1.py
