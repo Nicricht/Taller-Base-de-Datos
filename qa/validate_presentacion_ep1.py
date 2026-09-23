@@ -127,7 +127,7 @@ def main() -> int:
     max_chars = max((len(s) for s in slides), default=0)
     check("Carga textual controlada", max_chars <= 1700, f"Máximo {max_chars} caracteres de texto en una diapositiva", results)
     check("Apoyo visual", sum(1 for n in picture_counts if n > 0) >= 3, f"{sum(1 for n in picture_counts if n > 0)} diapositivas contienen imágenes", results)
-    check("Sin placeholders", not any_contains(combined, ("lorem ipsum", "todo", "placeholder", "insert text")), "No se detectaron textos de relleno.", results)
+    check("Sin placeholders", not any_contains(combined, ("lorem ipsum", "placeholder", "insert text")), "No se detectaron textos de relleno.", results)
 
     passed = sum(1 for _, ok, _ in results if ok)
     total = len(results)
