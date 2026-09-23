@@ -2,9 +2,12 @@
 
 ## Resultado
 
-**Estado esperado: APROBADO PARA PRESENTACIÓN cuando el workflow termine con todos los controles en PASS.**
+**Estado: APROBADO PARA PRESENTACIÓN.**
 
-La presentación de EDUBIO360 se valida contra la pauta oficial de BDY1103 para la **Situación Evaluativa 2: Presentación**, que corresponde al 60% de la Evaluación Parcial N° 1.
+La presentación de EDUBIO360 fue validada contra la pauta oficial de BDY1103 para la **Situación Evaluativa 2: Presentación**, que corresponde al 60% de la Evaluación Parcial N° 1.
+
+**Resultado automatizado de la presentación: 17/17 controles aprobados.**  
+**Resultado automatizado del informe: 15/15 controles aprobados.**
 
 El control combina tres capas:
 
@@ -34,11 +37,14 @@ El control combina tres capas:
 
 ## Revisión técnica
 
+- Archivo PPTX válido: **PASS**.
 - Total de diapositivas: **10**.
 - Notas del presentador: **10/10 diapositivas**.
 - Revisión visual local de desbordamiento: **PASS, sin overflow**.
+- Carga textual controlada: **PASS**; máximo detectado de 837 caracteres en una diapositiva.
+- Apoyo visual: **PASS**; tres diapositivas incorporan evidencias gráficas reales.
 - Se reutilizan evidencias reales de ejecución de VARRAY, cursores y excepciones almacenadas en el proyecto.
-- No se utilizan placeholders ni textos de relleno.
+- No se detectaron placeholders ni textos de relleno.
 
 ## Proceso reproducible
 
@@ -64,4 +70,4 @@ La versión PDF puede exportarse desde PowerPoint para entrega o respaldo, pero 
 
 ## Criterio de cierre
 
-La presentación se considera lista cuando el workflow termina correctamente y `qa/validate_presentacion_ep1.py` informa **todos los controles en PASS**. Si se modifica la presentación y desaparece un requisito obligatorio de la pauta, el workflow debe fallar.
+La presentación se considera lista porque el workflow completó correctamente la generación, las validaciones del informe y de la presentación, y el versionado del PPTX. Si se modifica la presentación y desaparece un requisito obligatorio de la pauta, el workflow fallará.
