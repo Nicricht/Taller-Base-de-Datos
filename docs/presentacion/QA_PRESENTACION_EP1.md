@@ -2,15 +2,15 @@
 
 ## Resultado
 
-**Estado: APROBADO PARA PRESENTACIÓN**
+**Estado esperado: APROBADO PARA PRESENTACIÓN cuando el workflow termine con todos los controles en PASS.**
 
-La presentación de EDUBIO360 fue revisada contra la pauta oficial de BDY1103 para la **Situación Evaluativa 2: Presentación**, que corresponde al 60% de la Evaluación Parcial N° 1.
+La presentación de EDUBIO360 se valida contra la pauta oficial de BDY1103 para la **Situación Evaluativa 2: Presentación**, que corresponde al 60% de la Evaluación Parcial N° 1.
 
 El control combina tres capas:
 
 1. **Cobertura de la pauta:** se comprueba que todos los puntos obligatorios aparezcan y estén justificados.
 2. **QA automatizado:** `qa/validate_presentacion_ep1.py` inspecciona directamente el archivo PPTX y falla si falta un indicador esencial.
-3. **QA visual/técnico:** se valida que la presentación no tenga desbordes y que mantenga una extensión ejecutiva.
+3. **QA visual/técnico:** la presentación fue revisada para evitar desbordes y mantener una extensión ejecutiva de 10 diapositivas.
 
 ## Matriz de cumplimiento
 
@@ -34,28 +34,34 @@ El control combina tres capas:
 
 ## Revisión técnica
 
-- Archivo PPTX válido: **sí**.
 - Total de diapositivas: **10**.
 - Notas del presentador: **10/10 diapositivas**.
-- Prueba de desbordamiento con `slides_test.py`: **PASS, sin overflow**.
-- La presentación incluye capturas reales de Oracle SQL Developer y el modelo relacional generado desde Oracle SQL Developer Data Modeler.
-- No se detectaron placeholders ni textos de relleno.
+- Revisión visual local de desbordamiento: **PASS, sin overflow**.
+- Se reutilizan evidencias reales de ejecución de VARRAY, cursores y excepciones almacenadas en el proyecto.
+- No se utilizan placeholders ni textos de relleno.
 
-## QA automatizado
+## Proceso reproducible
 
-Ejecutar desde la raíz del repositorio:
+La presentación se genera desde el repositorio con:
+
+```bash
+python qa/build_presentacion_ep1.py
+```
+
+Luego se valida con:
 
 ```bash
 python qa/validate_presentacion_ep1.py
 ```
 
-El workflow `.github/workflows/ep1-rubric-qa.yml` ejecuta automáticamente tanto el QA del informe como el QA de la presentación en cada `push`, `pull_request` y ejecución manual.
+El workflow `.github/workflows/ep1-rubric-qa.yml` genera el PPTX, ejecuta el QA del informe, ejecuta el QA de la presentación y, si todos los controles pasan en `main`, versiona automáticamente el archivo generado.
 
-## Archivos validados
+## Archivo versionado
 
 - `docs/presentacion/EDUBIO360_EP1_PRESENTACION_FINAL.pptx`
-- `docs/presentacion/EDUBIO360_EP1_PRESENTACION_FINAL.pdf`
+
+La versión PDF puede exportarse desde PowerPoint para entrega o respaldo, pero el artefacto fuente versionado en GitHub es el PPTX.
 
 ## Criterio de cierre
 
-La presentación se considera lista mientras el QA automatizado termine con **todos los controles en PASS**. Si se modifica el PPTX y un requisito obligatorio desaparece, el workflow debe fallar para evitar entregar una versión incompleta.
+La presentación se considera lista cuando el workflow termina correctamente y `qa/validate_presentacion_ep1.py` informa **todos los controles en PASS**. Si se modifica la presentación y desaparece un requisito obligatorio de la pauta, el workflow debe fallar.
