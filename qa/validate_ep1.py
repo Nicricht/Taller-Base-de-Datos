@@ -41,7 +41,7 @@ required_report_sections = [
     "## 4.2 VARRAY",
     "# 5. Cursores y loops",
     "# 6. Control de excepciones",
-    "# 7. Evaluación de procedimientos, funciones, packages y triggers",
+    "# 7. Procedimientos, funciones, packages y triggers",
     "# 8. Conclusión",
     "# 9. Anexos",
 ]
